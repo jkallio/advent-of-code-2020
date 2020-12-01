@@ -33,21 +33,28 @@ fn main() -> Result<(), Error> {
     if let Ok(vec) = vec {
 
         // Iterate through the vector, and find the two addends of sum 2020
-        for x in 0..vec.len() {
+        'part1: for x in 0..vec.len() {
             for y in 0..vec.len() {
                 if vec[x] + vec[y] == 2020 {
-                    println!("{}: {} = {}", vec[x], vec[y], vec[x] * vec[y]);
+                    println!("{}, {}: sum = {}, product = {}", 
+                        vec[x], vec[y], 
+                        vec[x] + vec[y],
+                        vec[x] * vec[y]);
+                    break 'part1;
                 }
             }
         }
 
         // Iterate through the vector, and find three addends of sum 2020
-        for x in 0..vec.len() {
+        'part2: for x in 0..vec.len() {
             for y in 0..vec.len() {
                 for z in 0..vec.len() {
                     if vec[x] + vec[y] + vec[z] == 2020 {
-                        println!("{} + {} + {} = {}", vec[x], vec[y], vec[z], vec[x] + vec[y] + vec[z]);
-                        println!("{} * {} * {} = {}", vec[x], vec[y], vec[z], vec[x] * vec[y] * vec[z]);
+                        println!("{}, {}, {}: sum = {}, product = {}", 
+                            vec[x], vec[y], vec[z], 
+                            vec[x] + vec[y] + vec[z],
+                            vec[x] * vec[y] * vec[z]);
+                        break 'part2;
                     }
                 }
             }
