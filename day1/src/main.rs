@@ -33,18 +33,14 @@ fn split_file(path: &str) -> Result<Vec<i64>, std::io::Error> {
 }
 
 // Main function
-fn main() -> Result<(), Error> {
+fn main() {
     let filename = "input.txt";
-    let vec = split_file(filename);
-    if let Ok(vec) = vec {
-
-        let addends = Vec::<i64>::new();
-        recursive_find_addends(&vec, &addends, 2020, 3); 
+    if let Ok(vec) = split_file(filename) {
+        recursive_find_addends(&vec, &Vec::<i64>::new(), 2020, 3); 
     }
-    return Ok(())
 }
 
-// Return the sum of vector elements
+// Returns the sum of vector elements
 fn sum_of_vector_elements(vec: &Vec<i64>) -> i64 {
     let mut sum:i64 = 0;
     for a in vec {
@@ -54,10 +50,22 @@ fn sum_of_vector_elements(vec: &Vec<i64>) -> i64 {
 }
 
 // Find addends that has total sum of given sum_target
-// Calls recursively 
-fn recursive_find_addends(vec: &Vec<i64>, addends:&Vec<i64>, sum_target:i64, iter:i64) -> bool {
-
-    if sum_of_vector_elements(addends) == sum_target {
+// Calls recursively itself while iterating vec
+//      vec:        Vector containing all elements
+//      addends:    List of sum addend candidates
+//      sum_target: Recursion is stopped when the sum of addends match this value
+//      iters_left: Number of iterations left before should stop
+fn recursive_find_addends(vec: &Vec<i64>, addends:&Vec<i64>, sum_target:i64, iters_left:i64) -> bool {
+    if iters_left > 0 {
+        for x in 0..vec.len() {
+            let mut a:Vec<i64> = addends.clone();
+            a.push(vec[x]);
+            if recursive_find_addends(vec, &a, sum_target, iters_left-1) {
+                return true;
+            }
+        }
+    }
+    else if sum_of_vector_elements(addends) == sum_target {
         let mut product = 1;
         for a in addends {
             product *= a;
@@ -65,15 +73,6 @@ fn recursive_find_addends(vec: &Vec<i64>, addends:&Vec<i64>, sum_target:i64, ite
         }
         println!(" => {}", product);
         return true;
-    }
-    else if iter > 0 {
-        for x in 0..vec.len() {
-            let mut a:Vec<i64> = addends.clone();
-            a.push(vec[x]);
-            if recursive_find_addends(vec, &a, sum_target, iter-1) {
-                return true;
-            }
-        }
     }
     return false;
 }
