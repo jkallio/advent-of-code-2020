@@ -31,8 +31,13 @@ fn main() -> Result<(), Error> {
     let filename = "input.txt";
     let vec = read(filename);
     if let Ok(vec) = vec {
-        for line in vec {
-            println!("{}", line);
+        for x in 0..vec.len() {
+            for y in 0..vec.len() {
+                if vec[x] + vec[y] == 2020 {
+                    println!("{}: {} = {}", vec[x], vec[y], vec[x] * vec[y]);
+
+                }
+            }
         }
     }
     Ok(())
