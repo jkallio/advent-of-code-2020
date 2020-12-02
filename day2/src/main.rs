@@ -2,6 +2,7 @@ use std::fs::File;
 use std::io::{BufReader, BufRead, Error, ErrorKind};
 
 // Split file into vector of strings
+//  + path:     filepath
 fn split_file(path: &str) -> Result<Vec<String>, std::io::Error> {    
     // Open the file and wrap it into generic buffered reader
     let file = File::open(path)?; // '?' Early exit on error
@@ -16,14 +17,19 @@ fn split_file(path: &str) -> Result<Vec<String>, std::io::Error> {
 }
 
 // Returns parsed min and max values from input string (e.g. "1-7")
-fn parse_min_max(range: &str) -> Result<(i32, i32), std::io::Error> {
-    let mut it = range.split("-");
+//  + range:    input string for parsing 
+fn parse_min_max(s: &str) -> Result<(i32, i32), std::io::Error> {
+    let mut it = s.split("-");
     let a = it.next().unwrap().parse().map_err(|e| Error::new(ErrorKind::InvalidData, e))?;
     let b = it.next().unwrap().parse().map_err(|e| Error::new(ErrorKind::InvalidData, e))?;
     return Ok((a,b));
 }
 
 // Part-1: Returns true if password contains at least limit_min amount of seek_char but not more than limit_max
+//  + passwd:       Password string
+//  + seek_char:    Character being searched from the password
+//  + limit_min:    Min amount of seek_char to be found from password
+//  + limit_max:    Max amount of seek_char to be found from passowrd
 fn check_validity1(passwd: &str, seek_char: char, limit_min: i32, limit_max: i32) -> bool {
     let c = passwd.matches(seek_char).count() as i32;
     if c >= limit_min && c <= limit_max {
@@ -34,6 +40,10 @@ fn check_validity1(passwd: &str, seek_char: char, limit_min: i32, limit_max: i32
 }
 
 // Part-2: Returns true if password has seek_char at either pos1 or pos2 but not at both at the same time
+//  + passwd:       Password string
+//  + seek_char:    Character being searched from the password
+//  + pos1:         1st position for seek_char
+//  + pos2:         2nd position for seek_char
 fn check_validity2(passwd: &str, seek_char: char, pos1: usize, pos2: usize) -> bool {
     let a = passwd.chars().nth(pos1).unwrap();
     let b = passwd.chars().nth(pos2).unwrap();
