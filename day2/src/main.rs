@@ -28,20 +28,24 @@ fn main() {
     let filename = "input.txt";
     let result = split_file(filename);
     match result {
-        Ok(v) => {
+        Ok(lines) => {
+            let mut valid_passwords = 0;
             // Loop through the stored passwords
-            for x in v {
-                // Split the line => min-max; character; password
-                let mut token_iter = x.split_whitespace();
+            for line in lines {
+                // Split the line tokens where [0]="min-max" [1]="character" [2]="password string"
+                let mut token_iter = line.split_whitespace();
                 if let Ok((a, b)) = parse_min_max(token_iter.next().unwrap()) {
-                    println!("min={}; max={}", a, b);
+                    let seek_char = token_iter.next().unwrap().chars().nth(0).unwrap();
+                    let passwd = token_iter.next().unwrap();
+
+                    // Count occurances of seek_char in passwd
+                    let c = passwd.matches(seek_char).count() as i32;
+                    if c >= a && c <= b {
+                        valid_passwords += 1;
+                    }
                 }
-                
-                /*
-                let tokens:Vec<&str> = x.split_whitespace().collect();
-                let range = parse_range(tokens[0]);
-                */
             }
+            println!("Total number of valid passwords is {}", valid_passwords);
         },
         Err(e) => {
             println!("*** Error: {}", e);
