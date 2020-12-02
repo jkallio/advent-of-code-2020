@@ -23,13 +23,35 @@ fn parse_min_max(range: &str) -> Result<(i32, i32), std::io::Error> {
     return Ok((a,b));
 }
 
+// Part-1: Returns true if password contains at least limit_min amount of seek_char but not more than limit_max
+fn check_validity1(passwd: &str, seek_char: char, limit_min: i32, limit_max: i32) -> bool {
+    let c = passwd.matches(seek_char).count() as i32;
+    if c >= limit_min && c <= limit_max {
+        //println!("{} contains {} of {} [{},{}]", passwd, c, seek_char, limit_min, limit_max);
+        return true;
+    }
+    return false;
+}
+
+// Part-2: Returns true if password has seek_char at either pos1 or pos2 but not at both at the same time
+fn check_validity2(passwd: &str, seek_char: char, pos1: usize, pos2: usize) -> bool {
+    let a = passwd.chars().nth(pos1).unwrap();
+    let b = passwd.chars().nth(pos2).unwrap();
+    if a != b && (a == seek_char || b == seek_char) {
+        return true;
+    }
+    return false;
+}
+
 // Main function
 fn main() {
     let filename = "input.txt";
     let result = split_file(filename);
     match result {
         Ok(lines) => {
-            let mut valid_passwords = 0;
+            let mut valid_passwords_1 = 0;
+            let mut valid_passwords_2 = 0;
+
             // Loop through the stored passwords
             for line in lines {
                 // Split the line tokens where [0]="min-max" [1]="character" [2]="password string"
@@ -38,23 +60,22 @@ fn main() {
                     let seek_char = token_iter.next().unwrap().chars().nth(0).unwrap();
                     let passwd = token_iter.next().unwrap();
 
-                    // Count occurances of seek_char in passwd
-                    let c = passwd.matches(seek_char).count() as i32;
-                    if c >= a && c <= b {
-                        valid_passwords += 1;
+                    // Count valid passwords for Part-1
+                    if check_validity1(passwd, seek_char, a, b) {
+                        valid_passwords_1 += 1;
+                    }
+
+                    // Count valid passwords for Part-2
+                    if check_validity2(passwd, seek_char, (a-1) as usize, (b-1) as usize) {
+                        valid_passwords_2 += 1;
                     }
                 }
             }
-            println!("Total number of valid passwords is {}", valid_passwords);
+            println!("Part-1: Total number of valid passwords is {}", valid_passwords_1);
+            println!("Part-2: Total number of valid passwords is {}", valid_passwords_2);
         },
         Err(e) => {
             println!("*** Error: {}", e);
         }
     }
-
-/*
-18-19 p: fvpkgfkfjgwllqwhrjd
-12-13 v: kvvvbmdvvvvvvcvvvv
-3-5 m: mdmkmvhszpjcxl
-*/
 }
