@@ -51,10 +51,10 @@ fn sum_of_vector_elements(vec: &Vec<i64>) -> i64 {
 
 // Find addends that has total sum of given sum_target
 // Calls recursively itself while iterating vec
-//      vec:        Vector containing all elements
-//      addends:    List of sum addend candidates
-//      sum_target: Recursion is stopped when the sum of addends match this value
-//      iters_left: Number of iterations left before should stop
+//  + vec:        Vector containing all elements
+//  + addends:    List of sum addend candidates
+//  + sum_target: Recursion is stopped when the sum of addends match this value
+//  + iters_left: Number of iterations left before should stop
 fn recursive_find_addends(vec: &Vec<i64>, addends:&Vec<i64>, sum_target:i64, iters_left:i64) -> bool {
     if iters_left > 0 {
         for x in 0..vec.len() {
