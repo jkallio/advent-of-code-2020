@@ -1,3 +1,4 @@
+// Struct for storing Passport information
 pub struct Passport {
     pub byr: Option<i32>,        // (Birth Year)
     pub iyr: Option<i32>,        // (Issue Year)
@@ -9,7 +10,10 @@ pub struct Passport {
     pub cid: Option<i32>         // (Country ID)
 }
 
+// Helper functions for Passport struct
 impl Passport {
+
+    // Create and initialize new instance
     pub fn new() -> Self {
         return Passport {
             byr: None,
@@ -23,6 +27,7 @@ impl Passport {
         };
     }
 
+    // Retruns true if members have valid values
     pub fn is_valid(&self) -> bool {
         return self.byr != None
             && self.iyr != None
@@ -34,6 +39,7 @@ impl Passport {
             //&& self.cid != None // Ignore Country ID
     }
 
+    // Merges the fields from another passport (does not replace existing)
     pub fn merge(&mut self, pass:&Passport) {
         if self.byr == None { self.byr = pass.byr; }
         if self.iyr == None { self.iyr = pass.iyr; }
@@ -45,6 +51,7 @@ impl Passport {
         if self.cid == None { self.cid = pass.cid; }
     }
 
+    // Prints all the fields neatly
     pub fn print_all(&self) {
         println!("\r\nPassport: {}", self.is_valid());
         match self.byr { Some(x) => println!("byr = {}", x), None => println!("byr = N/a") }
