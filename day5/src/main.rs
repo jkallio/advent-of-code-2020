@@ -26,15 +26,21 @@ fn calculate_seat_id(row:i32, col:i32) -> i32 {
     return row * 8 + col;
 }
 
-// Find empty seats
-fn find_empty_seats(seat_map: &Vec<Vec<bool>>) -> Vec<i32> {
+// Find empty seats (and print the seatmap at the same time)
+//  + seat_map: 2-dimensional boolean vector where 'true' indicates occupied seat
+fn find_empty_seats(seat_map: &Vec<Vec<bool>>) -> Vec<u16> {
     let mut empty_seats = Vec::new();
     for (i, row) in seat_map.iter().enumerate() {
+        let mut id = 0;
         for (j, seat) in row.iter().enumerate() {
-            if !seat {
-                empty_seats.push(calculate_seat_id(i as i32, j as i32));
+            if !seat { 
+                print!("X ");
+                id = calculate_seat_id(i as i32, j as i32);
+                empty_seats.push(id as u16);
             }
+            else { print!(". "); }
         }
+        println!(" - {} ({})", i, id);
     }
     return empty_seats;
 }
@@ -53,22 +59,13 @@ fn main() {
                 seats[(row as usize)][(col as usize)] = true;
             }
         }
+
+        // Find empty seats
         let empty_seats = find_empty_seats(&seats);
-        for id in empty_seats {
-            println!("{}", id);
-        }
-    }
-}
 
-// Print the seat map
-//  + seat_map: 2-dimensional boolean vector where 'true' indicates occupied seat
-fn print_seat_map(seat_map: &Vec<Vec<bool>>) {
-
-    for (i, row) in seat_map.iter().enumerate() {
-        for seat in row {
-            if !seat { print!("X "); }
-            else { print!("."); }
-        }
-        println!(" - {}", i);
+        // My seat should be the last free seat. Note, that the plane does not actually have the seats in the front and the back. 
+        // It was given that both id-1 and id+1 seats should be occupied. Find such seat from the empty_seats vector
+        let my_id = &empty_seats.windows(3).find(|i| i[1] != i[0] + 1 && i[1] != i[2]-1).unwrap()[1];
+        println!("Your seat ID is {}", my_id);
     }
 }
