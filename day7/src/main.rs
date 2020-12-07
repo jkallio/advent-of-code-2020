@@ -20,13 +20,14 @@ fn parse_bag_contents(input: &str) -> Result<Vec<(i32, String)>, &'static str> {
     return Ok(contents);
 }
 
-fn parse_input_line(input: &str) -> Result<(&str, Vec<(i32, String)>), &'static str> {
+fn parse_input_line(input: &str) -> Result<(String, Vec<(i32, String)>), &'static str> {
     let input_parts: Vec<&str> = input.split(" bags contain ").collect();
     assert_eq!(input_parts.len() == 2, true); // Invalid input
 
     // Left side of the input string contains the key for the HashMap
-    if let Some(key) = input_parts.first() {
-        
+    if let Some(k) = input_parts.first() {
+        let key = String::from(*k);
+
         // Right side of the input string contains comma separated list of content
         if let Some(value) = input_parts.last() {
             let mut bag_content:Vec<(i32, String)> = Vec::new();
@@ -41,33 +42,43 @@ fn parse_input_line(input: &str) -> Result<(&str, Vec<(i32, String)>), &'static 
     panic!("Failed to parse input: \"{}\"", input);
 }
 
-fn main() {
-    let filename = "input.txt";
-    if let Ok(vec) = file_reader::read_to_vec(filename) {
-
-        // Each bag contains at least one other bag (stored as list of keys)
-        let _bags = HashMap::<&str, Vec<String>>::new();
-
-        for line in vec {
-            if let Ok(bag) = parse_input_line(&line) {
-                println!("'{}' contents: ", bag.0);
-                for b in bag.1 {
-                    println!("   {}: {}", b.0, b.1);
+fn contains_shiny_gold(key:&String, bags:&HashMap<String, Vec<(i32, String)>>) -> bool {
+    if let Some(others) = bags.get(key) {
+        for other in others {  
+            let key = &other.1;
+            if key.contains("shiny gold") {
+                return true;
+            }
+            else {
+                if contains_shiny_gold(&key, bags) == true {
+                    return true;
                 }
             }
-
-            /*
-            for part in parts {
-                println!("{}", part);
-            }
-
-            // Regex
-            let seperator = Regex::new(r"contain [0-9]").expect("Invalid regex");
-            let result = seperator.split(s);
-            for res in result {
-                println!("{}", res);
-            }
-            */
         }
+    }
+    return false;
+}
+
+fn main() {
+    let filename = "input.txt";
+    if let Ok(input_vec) = file_reader::read_to_vec(filename) {
+
+        // Each bag contains at least one other bag (stored as list of keys)
+        let mut bags = HashMap::<String, Vec<(i32, String)>>::new();
+        for line in input_vec {
+            if let Ok(bag) = parse_input_line(&line) {
+                bags.insert(bag.0, bag.1);
+            }
+        }
+
+
+        let mut bags_containing_shiny_gold = 0;
+        for key in bags.keys() {
+            if contains_shiny_gold(&key, &bags) {
+                println!("{} contains shiny gold", key);
+                bags_containing_shiny_gold += 1;
+            }
+        }
+        println!("Total bags containing shiny gold is {}", bags_containing_shiny_gold);
     }
 }
