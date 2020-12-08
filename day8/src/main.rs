@@ -1,16 +1,41 @@
-use std::fs::File;
-use std::io::{BufReader, BufRead};
+mod jk;
+use jk::file_reader;
 
-const cmd_list:[&'static str; 3] = ["acc", "jmp", "nop"];
+fn parse_line(line:&str) -> Result<(&str, i32), &'static str> {
+    let mut parts = line.split_whitespace();
+    if let Some(cmd) = parts.next() {
+        if let Some(value) = parts.next() {
+            if let Ok(parsed_value) = value.parse::<i32>() {
+                return Ok((cmd, parsed_value));
+            }
+        }
+    }
+    panic!("Failed to parse value from line {}", line);
+}
 
 fn main() {
     let filename = "input.txt";
-
-    let file = File::open(filename);
-    let mut tree_count = 0;
-    let mut pos = 0;
-    let br = BufReader::new(file.unwrap());
-    for (index, buf) in br.lines().enumerate() {  
-        println!("{}", buf);
+    if let Ok(vec) = file_reader::read_to_vec(filename) {
+        let mut pos:i32 = 0;
+        let mut accumulator:i32 = 0;
+        let mut history = Vec::<i32>::new();
+        loop {
+            if history.contains(&pos) {
+                println!("Infinite loop detected!");
+                break;
+            }
+            history.push(pos);
+            let line = &vec[pos as usize];
+            history.push(pos);
+            if let Ok(cmd) = parse_line(&line) {
+                match cmd.0 {
+                    "acc" => { accumulator += cmd.1; pos += 1; }
+                    "jmp" => { pos += cmd.1; }
+                    "nop" => { pos += 1; }
+                    _ => { panic!("Invalid command: {}", cmd.0); }
+                }
+            }
+        }
+        println!("Accumulator value {}", accumulator);
     }
 }
