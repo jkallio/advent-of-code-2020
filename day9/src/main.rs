@@ -2,7 +2,7 @@ use file_reader;
 
 fn main() {
     let input = "input.txt";
-    let vec = file_reader::read_to_i32_vec(input);
+    let vec = file_reader::read_to_i64_vec(input);
     match vec {
         Ok(vec) => {
             for line in vec {
