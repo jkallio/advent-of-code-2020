@@ -51,12 +51,4 @@ pub fn read_to_i32_vec(path: &str) -> Result<Vec<i32>, std::io::Error> {
     }
     Ok(vec)
 }
-/* TODO: Write unit tests
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
-*/
+
