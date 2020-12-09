@@ -7,12 +7,12 @@ use std::io::{BufRead, BufReader, Error, ErrorKind};
 /// 
 /// # Examples
 /// ```
-/// let file_path = "my_file.txt";
-/// if let Ok(vec) = parse_input_file(&file_path) {
-///     // Valid Vec<String>
+/// let file_path = "test_input_i32.txt";
+/// if let Ok(vec) = file_reader::read_to_string_vec(&file_path) {
+///     assert_eq!(vec.is_empty(), false);  // Valid Vec<String>
 /// }
 /// else {
-///     // Handle std::io::Error
+///     assert!(false); // Handler std::io::Error
 /// }
 /// ```
 #[allow(dead_code)]
@@ -26,6 +26,18 @@ pub fn read_to_string_vec(path: &str) -> Result<Vec<String>, std::io::Error> {
     Ok(vec)
 }
 
+/// Reads given file line by line into a vector of 32-bit integers.
+/// 
+/// # Examples
+/// ```
+/// let file_path = "test_input_i32.txt";
+/// if let Ok(vec) = file_reader::read_to_i32_vec(&file_path) {
+///     assert_eq!(vec.is_empty(), false); // Valid Vec<i32>
+/// }
+/// else {
+///     assert!(false); // Handler std::io::Error
+/// }
+/// ```
 #[allow(dead_code)]
 pub fn read_to_i32_vec(path: &str) -> Result<Vec<i32>, std::io::Error> {
     let file = File::open(path)?;
