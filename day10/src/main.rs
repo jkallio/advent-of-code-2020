@@ -1,17 +1,18 @@
 fn main() {
     let input = "input.txt"; 
     let mut vec = file_reader::read_to_i64_vec(input).unwrap();
+    vec.push(0); // Starting from 0 jolts
     vec.sort();
-    let mut diff_1 = 1; // Starting from 1 because first outlet is 0 and first adapter is 1
-    let mut diff_3 = 1; // Starting from 3 because internal adapter is 3 higher than highest adapter in the bag
+    vec.push(vec.last().unwrap() + 3); // Internal adapter is 3 higher than highest adapter in the bag
+    
+    let mut count_ones = 0;
+    let mut count_threes = 0;
     for adapters in vec.windows(2) {
-        let diff = adapters[1] - adapters[0];
-        match diff {
-            1 => { diff_1 += 1; }
-            3 => { diff_3 += 1; }
-            _ => { panic!(""); }
+        match adapters[1] - adapters[0] {
+            1 => { count_ones += 1; }
+            3 => { count_threes += 1; }
+            _ => { panic!("invalid joltage"); }
         }
-        //println!("{} --> ({}-{})", adapters[1], diff_1, diff_3);
     }
-    println!("{}", diff_1 * diff_3);
+    println!("Jolt differences multplied = {}", count_ones * count_threes);
 }
