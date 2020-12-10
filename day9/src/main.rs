@@ -1,13 +1,15 @@
-/// Returns `true` if given vector contains at least one pair of
-/// addends that sum up to the value found from the last position
-/// of the input vector.
+/// Returns true if at least one pair of values are found from `vec` that have the sum of `sum_target`
 ///
 /// # Arguments
-/// * `vec` input vector that contains the values where to search the addends.
+/// * `vec` input from where to search the addends.
+/// * `sum_target` target value for the sum.
 ///
 /// # Examples
+/// ```
 /// let vec = vec![35, 20, 15, 25, 47, 40, 62, 55, 65, 95, 102, 117, 150, 182, 127, 219, 299, 277, 309, 576];
-///
+/// let sum_target = 403; // = 95 + 309
+/// assert_eq!(find_addend_pair(vec, sum_target), true);
+/// ```
 fn find_addend_pair(vec: Vec<i64>, sum_target: i64) -> bool {
     let max_index = vec.len();
     for (i, a) in vec.iter().enumerate() {
@@ -17,7 +19,7 @@ fn find_addend_pair(vec: Vec<i64>, sum_target: i64) -> bool {
             }
         }
     }
-    false
+    true
 }
 
 /// Main function
