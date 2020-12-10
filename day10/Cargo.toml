@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 file_reader = { path = "../file_reader" }
+permutohedron = "0.2.4"
