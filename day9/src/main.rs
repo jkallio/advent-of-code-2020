@@ -10,7 +10,7 @@
 /// let sum_target = 403; // = 95 + 309
 /// assert_eq!(find_addend_pair(vec, sum_target), true);
 /// ```
-fn find_addend_pair(vec: Vec<i64>, sum_target: i64) -> bool {
+fn find_addend_pair(vec: &Vec<i64>, sum_target: i64) -> bool {
     let max_index = vec.len();
     for (i, a) in vec.iter().enumerate() {
         for (j, b) in vec.iter().enumerate() {
@@ -19,7 +19,7 @@ fn find_addend_pair(vec: Vec<i64>, sum_target: i64) -> bool {
             }
         }
     }
-    true
+    false
 }
 
 /// Main function
@@ -29,8 +29,9 @@ fn main() {
     match vec {
         Ok(vec) => {
             for slice in vec.windows(26) {
-                if !find_addend_pair((&slice[..25]).to_vec(), slice[25]) {
-                    println!("Not found! value is {}", slice.last().unwrap());
+                let sum_target:i64 = slice[25]; //*slice.last().unwrap();
+                if !find_addend_pair(&(&slice[..25]).to_vec(), sum_target) {
+                    println!("First value to not to follow the rule is  {}", sum_target);
                 }
             }
         }
@@ -38,5 +39,4 @@ fn main() {
             println!("{}", e);
         }
     }
-    println!("End");
 }
