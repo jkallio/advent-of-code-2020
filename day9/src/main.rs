@@ -22,17 +22,44 @@ fn find_addend_pair(vec: &Vec<i64>, sum_target: i64) -> bool {
     false
 }
 
+
+
 /// Main function
 fn main() {
     let input = "input.txt";
     let vec = file_reader::read_to_i64_vec(input);
     match vec {
         Ok(vec) => {
+            // Part-1 --> 
+            let mut invalid_number:i64 = 0;
             for slice in vec.windows(26) {
-                let sum_target:i64 = slice[25]; //*slice.last().unwrap();
+                let sum_target:i64 = *slice.last().unwrap();
                 if !find_addend_pair(&(&slice[..25]).to_vec(), sum_target) {
-                    println!("First value to not to follow the rule is  {}", sum_target);
+                    invalid_number = sum_target;
+                    break;
                 }
+            }
+            println!("First value to not to follow the rule is {}", invalid_number);
+
+            // Part-2 --> 
+            let mut window_size = 2;
+            'outer: loop {
+                println!("Window size = {}", window_size);
+                if window_size < vec.len() {
+                    for slice in vec.windows(window_size) {
+                        let sum:i64 = slice.iter().sum();
+                        if sum == invalid_number {
+                            let encryption_weakness = slice.iter().min().unwrap() + slice.iter().max().unwrap();
+                            println!("Encryption weakness is {}", encryption_weakness);
+                            break 'outer;
+                        }
+                    }
+                }
+                else {
+                    println!("ERR! Window size exceeds vector size");
+                    break;
+                }
+                window_size += 1;
             }
         }
         Err(e) => {
