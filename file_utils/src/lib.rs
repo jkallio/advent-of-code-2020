@@ -7,7 +7,7 @@ use std::io::{BufRead, BufReader, Error, ErrorKind};
 /// # Examples
 /// ```
 /// let file_path = "test_input_i32.txt";
-/// if let Ok(vec) = file_reader::read_to_string_vec(&file_path) {
+/// if let Ok(vec) = file_utils::read_to_string_vec(&file_path) {
 ///     assert_eq!(vec.is_empty(), false);  // Valid Vec<String>
 /// }
 /// else {
@@ -30,7 +30,7 @@ pub fn read_to_string_vec(path: &str) -> Result<Vec<String>, std::io::Error> {
 /// # Examples
 /// ```
 /// let file_path = "test_input_i32.txt";
-/// if let Ok(vec) = file_reader::read_to_i64_vec(&file_path) {
+/// if let Ok(vec) = file_utils::read_to_i64_vec(&file_path) {
 ///     assert_eq!(vec.is_empty(), false); // Valid Vec<i64>
 /// }
 /// else {
