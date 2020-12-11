@@ -1,35 +1,59 @@
-fn get_next_slice(vec:&Vec<i64>) -> Option<Vec<i64>> {
 
-
-    None
-}
-
-fn count_joltage_diff(vec:&Vec<i64>) -> i64 {
-    let mut count_ones = 0;
-    let mut count_threes = 0;
+fn count_joltage_diff(vec:&Vec<i64>) -> Vec<i64> {
+    let mut diffs = Vec::new();
+    let mut one_count = 0;
+    let mut three_count = 0;
     for adapters in vec.windows(2) {
         match adapters[1] - adapters[0] {
             1 => {
-                count_ones += 1;
+                one_count += 1;
+                diffs.push(1);
             }
             3 => {
-                count_threes += 1;
+                three_count += 1;
+                diffs.push(3);
             }
             _ => {
                 panic!("invalid joltage");
             }
         }
     }
-    return count_ones * count_threes;
+    println!("Jolt differences multplied = {}", one_count * three_count);
+    diffs
 }
 
 fn main() {
     let input = "input.txt";
-    let mut vec = file_reader::read_to_i64_vec(input).unwrap();
+    let mut vec = file_utils::read_to_i64_vec(input).unwrap();
     vec.push(0); // Starting from 0 jolts
     vec.sort_unstable();
     vec.push(vec.last().unwrap() + 3); // Internal adapter is 3 higher than highest adapter in the bag
 
-    let joltage_diff = count_joltage_diff(&vec);
-    println!("Jolt differences multplied = {}", joltage_diff);
+    let diff = count_joltage_diff(&vec);
+
+    let mut one_series = Vec::new();
+    let mut i = 0;
+    while i < diff.len() {
+        if diff[i] == 1 {
+            let mut count = 0;
+            while diff[i] == 1 {
+                count += 1;
+                i += 1;
+            }
+            one_series.push(count);
+        }
+        i += 1;
+    }
+
+    let mut vars:i64 = 1;
+    for z in one_series {
+        match z {
+            1 => { vars *= 1; }
+            2 => { vars *= 2; }
+            3 => { vars *= 4; }
+            4 => { vars *= 7; }
+            _ => { panic!(""); }
+        }
+    }
+    println!("{}", vars);
 }
