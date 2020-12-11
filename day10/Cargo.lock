@@ -4,12 +4,16 @@
 name = "day10"
 version = "0.1.0"
 dependencies = [
+<<<<<<< HEAD
  "file_reader",
  "permutohedron",
+=======
+ "file_utils",
+>>>>>>> day10
 ]
 
 [[package]]
-name = "file_reader"
+name = "file_utils"
 version = "0.1.0"
 
 [[package]]
