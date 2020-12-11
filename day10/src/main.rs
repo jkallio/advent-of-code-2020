@@ -1,5 +1,4 @@
-
-fn count_joltage_diff(vec:&Vec<i64>) -> Vec<i64> {
+fn count_joltage_diff(vec: &[i64]) -> Vec<i64> {
     let mut diffs = Vec::new();
     let mut one_count = 0;
     let mut two_count = 0;
@@ -23,11 +22,15 @@ fn count_joltage_diff(vec:&Vec<i64>) -> Vec<i64> {
             }
         }
     }
-    println!("Jolt differences multplied = {} (two_count={})", one_count * three_count, two_count);
+    println!(
+        "Jolt differences multplied = {} (two_count={})",
+        one_count * three_count,
+        two_count
+    );
     diffs
 }
 
-fn count_permutations(diff:&Vec<i64>) -> i64 {
+fn count_permutations(diff: &[i64]) -> i64 {
     let mut one_series = Vec::new();
     let mut i = 0;
     while i < diff.len() {
@@ -42,14 +45,24 @@ fn count_permutations(diff:&Vec<i64>) -> i64 {
         i += 1;
     }
 
-    let mut permutations:i64 = 1;
+    let mut permutations: i64 = 1;
     for z in one_series {
         match z {
-            1 => { permutations *= 1; }
-            2 => { permutations *= 2; }
-            3 => { permutations *= 4; }
-            4 => { permutations *= 7; }
-            _ => { panic!(""); }
+            1 => {
+                permutations *= 1;
+            }
+            2 => {
+                permutations *= 2;
+            }
+            3 => {
+                permutations *= 4;
+            }
+            4 => {
+                permutations *= 7;
+            }
+            _ => {
+                panic!("");
+            }
         }
     }
     permutations
