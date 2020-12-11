@@ -1,20 +1,9 @@
-<<<<<<< HEAD
-fn get_next_slice(vec:&Vec<i64>) -> Option<Vec<i64>> {
-
-
-    None
-}
-
-fn count_joltage_diff(vec:&Vec<i64>) -> i64 {
-    let mut count_ones = 0;
-    let mut count_threes = 0;
-=======
 fn count_joltage_diff(vec: &[i64]) -> Vec<i64> {
     let mut diffs = Vec::new();
     let mut one_count = 0;
     let mut two_count = 0;
     let mut three_count = 0;
->>>>>>> day10
+
     for adapters in vec.windows(2) {
         match adapters[1] - adapters[0] {
             1 => {
@@ -34,9 +23,7 @@ fn count_joltage_diff(vec: &[i64]) -> Vec<i64> {
             }
         }
     }
-<<<<<<< HEAD
-    return count_ones * count_threes;
-=======
+
     println!(
         "Jolt differences multplied = {} (two_count={})",
         one_count * three_count,
@@ -81,27 +68,17 @@ fn count_permutations(diff: &[i64]) -> i64 {
         }
     }
     permutations
->>>>>>> day10
 }
 
 fn main() {
     let input = "input.txt";
-<<<<<<< HEAD
-    let mut vec = file_reader::read_to_i64_vec(input).unwrap();
-=======
     let mut vec = file_utils::read_to_i64_vec(input).unwrap();
->>>>>>> day10
     vec.push(0); // Starting from 0 jolts
     vec.sort_unstable();
     vec.push(vec.last().unwrap() + 3); // Internal adapter is 3 higher than highest adapter in the bag
 
-<<<<<<< HEAD
-    let joltage_diff = count_joltage_diff(&vec);
-    println!("Jolt differences multplied = {}", joltage_diff);
-=======
     let diff = count_joltage_diff(&vec);
     let perms = count_permutations(&diff);
 
     println!("Total permutations {}", perms);
->>>>>>> day10
 }
