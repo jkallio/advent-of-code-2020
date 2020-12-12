@@ -1,4 +1,3 @@
-
 /// Consecutive one jolt differences increase the number of ways adapters can be connected
 /// e.g. ...(1)-(4)-(5)-(6)-(9) has two consecutive one jolt differencse => it adds another permumation
 ///      -> (1)-(4)-----(6)-(9)
@@ -22,12 +21,11 @@ fn main() {
     vec.sort_unstable();
     vec.push(vec.last().unwrap() + 3); // Internal adapter is 3 higher than highest adapter in the bag
 
+    let mut one_count = 0; // Number of one jolt differences
+    let mut three_count = 0; // Number of three jolt differences
+    let mut consecutive_one_count = 0; // Counts consecutive one jolt differences
 
-    let mut one_count = 0;      // Number of one jolt differences
-    let mut three_count = 0;    // Number of three jolt differences
-    let mut consecutive_one_count = 0;  // Counts consecutive one jolt differences
-
-    let mut permutations:i64 = 1;  // Counts the total number of ways adapters can be connected
+    let mut permutations: i64 = 1; // Counts the total number of ways adapters can be connected
 
     for adapters in vec.windows(2) {
         match adapters[1] - adapters[0] {
@@ -37,16 +35,24 @@ fn main() {
             }
             3 => {
                 three_count += 1;
-                
+
                 // Consecutive one jolt differences increase permutations (see examples on top)
                 match consecutive_one_count {
-                    1 => {  permutations *= 1;  }
-                    2 => {  permutations *= 2;  }
-                    3 => {  permutations *= 4;  }
-                    4 => {  permutations *= 7;  }
-                    _ => { }
+                    1 => {
+                        permutations *= 1;
+                    }
+                    2 => {
+                        permutations *= 2;
+                    }
+                    3 => {
+                        permutations *= 4;
+                    }
+                    4 => {
+                        permutations *= 7;
+                    }
+                    _ => {}
                 }
-                consecutive_one_count = 0;  // Reset the counter
+                consecutive_one_count = 0; // Reset the counter
             }
             _ => {
                 panic!("invalid joltage");
