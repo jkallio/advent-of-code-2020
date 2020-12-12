@@ -1,4 +1,0 @@
-# Ignore Cargo.lock because this is a library and
-# you don't want to lock the users of this library 
-# to versions defined by this project)
-Cargo.lock
