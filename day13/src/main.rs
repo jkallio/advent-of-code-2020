@@ -21,9 +21,8 @@ fn parse_bus_schedule(input: &[String]) -> (i32, Vec<i32>) {
 }
 
 fn main() {
-    if let Ok(input) = file_utils::read_to_string_vec("input.txt") {
+    if let Ok(input) = file_utils::read_to_string_vec("test_input.txt") {
         let info = parse_bus_schedule(&input);
-        println!("{}", info.0);
         let mut smallest = (0, i32::MAX);
         for bus in info.1 {
             let modulo = info.0 % bus;
