@@ -1,9 +1,8 @@
-
 use regex::Regex;
 
 fn parse_bus_schedule(input: &[String]) -> (i32, Vec<i32>) {
     if input.len() == 2 {
-        let mut schedule:i32 = 0;
+        let mut schedule: i32 = 0;
         let mut buses = Vec::new();
         if let Ok(i) = input[0].parse() {
             schedule = i;
