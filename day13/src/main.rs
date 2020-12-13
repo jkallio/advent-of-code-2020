@@ -30,11 +30,11 @@ fn parse_bus_schedule(input: &[String]) -> (i32, Vec<(i32, i32)>) {
 
 // Returns the ID of the earliest bus you can take multiplied with the number of
 // minutes you'll need to wait for the bus.
-fn get_answer_for_part1(info: (i32, Vec<(i32, i32)>)) -> i32 {
+fn get_answer_for_part1(info: &(i32, Vec<(i32, i32)>)) -> i32 {
     let departure = info.0;
     let mut closest_to_departure = (0, i32::MAX); // bus_id & delta from departure time
 
-    for bus in info.1 {
+    for bus in &info.1 {
         let modulo = departure % bus.0;
         let diff = (modulo - bus.0).abs();
         if diff < closest_to_departure.1 {
@@ -45,10 +45,53 @@ fn get_answer_for_part1(info: (i32, Vec<(i32, i32)>)) -> i32 {
     closest_to_departure.0 * closest_to_departure.1
 }
 
-
 fn main() {
-    if let Ok(input) = file_utils::read_to_string_vec("test_input.txt") {
+    struct Bus {
+        id: i64,
+        t: i64,
+        timestamp:i64,
+    }
+
+    if let Ok(input) = file_utils::read_to_string_vec("test_input1.txt") {
         let info = parse_bus_schedule(&input);
-        println!("Answer for part-1 is {}", get_answer_for_part1(info));        
+        //let part1 = get_answer_for_part1(&info);
+        //println!("Answer for part-1 is {}", part1);
+
+        let mut buses = Vec::new();
+        for bus in info.1 {
+            let bus = Bus { 
+                id:bus.0 as i64,
+                t:bus.1 as i64,
+                timestamp:bus.0 as i64
+            };
+            buses.push(bus);
+        }
+        buses.sort_by_key(|k| k.id);
+
+        let mut target_t0 = 0;
+        loop {
+            let mut matches = 0;
+            for bus in buses.iter_mut() {
+                let target = target_t0 + bus.t;
+                while bus.timestamp < target {
+                    bus.timestamp += &bus.id;
+                }
+                if bus.timestamp > target {
+                    target_t0 = bus.timestamp - bus.t; 
+                    break;
+                }
+                else if bus.timestamp == target {
+                    matches += 1;
+                    if matches > 2 {
+                        println!("Matches={}; target={}", matches, target_t0);
+                    }
+                }
+            }  
+            if matches == buses.len() {
+                println!("FOUND!");
+                break;
+            }
+        }
+        println!("{}", target_t0);
     }
 }
