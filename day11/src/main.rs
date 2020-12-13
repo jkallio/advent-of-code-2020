@@ -6,12 +6,22 @@ enum Seat {
 }
 
 #[derive(Debug)]
-enum Direction { INVALID, NORTH, SOUTH, EAST, WEST, NE, SE, NW, SW }
+enum Direction {
+    INVALID,
+    NORTH,
+    SOUTH,
+    EAST,
+    WEST,
+    NE,
+    SE,
+    NW,
+    SW,
+}
 
-// Part1: Tolerance is 4. Part2: Tolerance is 5.
-const TOLERANCE: i32 = 5;
+// Set `true` for Part2
+const PART2: bool = true;
 
-fn get_direction(orig:(i32, i32), pos:(i32, i32)) -> Direction {
+fn get_direction(orig: (i32, i32), pos: (i32, i32)) -> Direction {
     let x = pos.0 - orig.0;
     let y = pos.1 - orig.1;
     match (x, y) {
@@ -46,25 +56,51 @@ fn get_seat_type_with_raycast(table: &[Vec<char>], pos: (i32, i32), dir: Directi
     let mut col = pos.1;
     loop {
         match dir {
-            Direction::NORTH => { row -= 1; },
-            Direction::SOUTH => { row += 1; },
-            Direction::EAST => { col += 1; },
-            Direction::WEST => { col -= 1; },
-            Direction::NE => { row -= 1; col += 1; }
-            Direction::SE => { row += 1; col += 1; }
-            Direction::NW => { row -= 1; col -= 1; }
-            Direction::SW => { row += 1; col -= 1; }
+            Direction::NORTH => {
+                row -= 1;
+            }
+            Direction::SOUTH => {
+                row += 1;
+            }
+            Direction::EAST => {
+                col += 1;
+            }
+            Direction::WEST => {
+                col -= 1;
+            }
+            Direction::NE => {
+                row -= 1;
+                col += 1;
+            }
+            Direction::SE => {
+                row += 1;
+                col += 1;
+            }
+            Direction::NW => {
+                row -= 1;
+                col -= 1;
+            }
+            Direction::SW => {
+                row += 1;
+                col -= 1;
+            }
             _ => panic!("Invalid direction!"),
         }
 
         if !check_bounds(&table, (row, col)) {
             return Seat::INVALID;
-        }
-        else {
+        } else {
             let seat_type = get_seat_type(&table, (row, col));
             match seat_type {
-                Seat::FLOOR => {},
-                _ => { return seat_type; }
+                Seat::FLOOR => {
+                    if !PART2 {
+                        // In part2: Raycast ignores the FLOOR and tries to find first seat that hits the raycast
+                        return seat_type;
+                    }
+                }
+                _ => {
+                    return seat_type;
+                }
             }
         }
     }
@@ -81,17 +117,12 @@ fn count_neighbors(table: &[Vec<char>], pos: (i32, i32)) -> i32 {
     let mut neigh_count = 0;
     for row in (pos.0 - 1)..=(pos.0 + 1) {
         for col in (pos.1 - 1)..=(pos.1 + 1) {
-            if row != pos.0 || col != pos.1 { // ignore own seat
-                
-                // Part-1: if let Seat::OCCUPIED = get_seat_type(table, (row, col)) {
-                // Part-2: if let Seat::OCCUPIED = get_seat_type_with_raycast(&table, pos, dir) {
-                
+            if row != pos.0 || col != pos.1 {
                 let dir = get_direction(pos, (row, col));
                 if let Seat::OCCUPIED = get_seat_type_with_raycast(&table, pos, dir) {
                     neigh_count += 1;
-                }   
+                }
             }
-            
         }
     }
     neigh_count
@@ -100,6 +131,7 @@ fn count_neighbors(table: &[Vec<char>], pos: (i32, i32)) -> i32 {
 fn main() {
     let input_file = "input.txt";
     if let Ok(mut table) = file_utils::read_to_char_table(input_file) {
+        let mut occupied_count: i32 = 0;
         loop {
             let mut new_table = table.clone();
             let mut arrangement_stabilized = true;
@@ -115,7 +147,11 @@ fn main() {
                             }
                         }
                         Seat::OCCUPIED => {
-                            if neighbors >= TOLERANCE {
+                            let mut tolerance = 4;
+                            if PART2 {
+                                tolerance = 5;
+                            }
+                            if neighbors >= tolerance {
                                 new_table[row][col] = 'L';
                                 arrangement_stabilized = false;
                             }
@@ -128,9 +164,9 @@ fn main() {
             if arrangement_stabilized {
                 break;
             }
-      
+
             // Count all occupied seats in the table
-            let mut occupied_count: i32 = 0;
+            occupied_count = 0;
             for row in 0..table.len() {
                 for col in 0..table[row].len() {
                     if let Seat::OCCUPIED = get_seat_type(&table, (row as i32, col as i32)) {
@@ -138,7 +174,7 @@ fn main() {
                     }
                 }
             }
-            println!("Num of occupied = {}", occupied_count);
         }
+        println!("Num of occupied = {}", occupied_count);
     }
 }
