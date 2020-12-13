@@ -7,28 +7,20 @@ fn parse_line(line: String) -> (char, i32) {
     panic!("Failed to parse line");
 }
 
-fn rotate(point:(i32, i32), deg:i32) -> (i32, i32) {
+fn rotate(point: (i32, i32), deg: i32) -> (i32, i32) {
     let mut d = deg;
     while d < 0 {
         d += 360;
     }
 
     match d % 360 {
-        0 => {
-            point
-        }
+        0 => point,
 
-        90 => {
-            (point.1, -point.0)
-        }
+        90 => (point.1, -point.0),
 
-        180 => {
-            (-point.0, -point.1)
-        }
+        180 => (-point.0, -point.1),
 
-        270 => {
-            (-point.1, point.0)
-        }
+        270 => (-point.1, point.0),
         _ => {
             panic!("Invalid direction");
         }
