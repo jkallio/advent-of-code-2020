@@ -1,4 +1,3 @@
-
 type CharMap = Vec<Vec<char>>;
 type Pos = (i32, i32);
 
@@ -27,16 +26,16 @@ fn get_seat_type(table:&CharMap, pos:Pos) -> Seat {
 
 fn count_neighbors(table:&CharMap, pos:Pos) -> i32 {
     let mut neigh_count = 0;
-    for row in (pos.0 - 1)..(pos.0 + 1) {
-        for col in (pos.1 - 1)..(pos.1 + 1) {
-            print!("({}, {})", row, col);
+    for row in (pos.0 - 1)..=(pos.0 + 1) {
+        for col in (pos.1 - 1)..=(pos.1 + 1) {            
             let seat_type = get_seat_type(&table, (row, col));
             if let Seat::OCCUPIED = seat_type {
-                neigh_count += 1;
+                if row != pos.0 || col != pos.1 {
+                    neigh_count += 1;
+                }
             }
         }
     }
-    println!("");
     neigh_count
 }
 
@@ -48,15 +47,13 @@ fn count_occupied(table:&CharMap) -> i32 {
             if let Seat::OCCUPIED = seat_type {
                 occupied_count += 1;
             }
-            print!("{}", table[row][col]);
         }
-        println!("");
     }
     occupied_count
 }
 
 fn main() {
-    let input_file = "test_input.txt";
+    let input_file = "input.txt";
     if let Ok(mut table) = file_utils::read_to_char_table(input_file) {
         loop {
             let mut new_table = table.clone();
@@ -65,9 +62,6 @@ fn main() {
                 for col in 0..table[row].len() {
                     let seat_type = get_seat_type(&table, (row as i32, col as i32));
                     let neighbors = count_neighbors(&table, (row as i32, col as i32));
-                    
-                    print!("{}", neighbors);
-
                     match seat_type {
                         Seat::EMPTY => {
                             if neighbors == 0 {
@@ -86,16 +80,11 @@ fn main() {
                 }
             }
             table = new_table.clone();
-            println!("\r\n----------");
             let occupied_count = count_occupied(&table);
-            println!("Num of occupied = {}", occupied_count);
             if arrangement_stabilized {
                 break;
             }
+            println!("Num of occupied = {}", occupied_count);
         }
-
-        // 7189 is too high
-        // 2747 is too high
-        // 4778 is too high
     }  
 }
