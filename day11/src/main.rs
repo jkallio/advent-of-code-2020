@@ -1,33 +1,30 @@
-type CharMap = Vec<Vec<char>>;
-type Pos = (i32, i32);
-
 enum Seat {
     INVALID,
     EMPTY,
     OCCUPIED,
-    FLOOR
+    FLOOR,
 }
 
-fn get_seat_type(table:&CharMap, pos:Pos) -> Seat {
+fn get_seat_type(table: &[Vec<char>], pos: (i32, i32)) -> Seat {
     let mut seat_type = Seat::INVALID;
     let row = pos.0;
     let col = pos.1;
     if row >= 0 && row < table.len() as i32 && col >= 0 && col < table[row as usize].len() as i32 {
         let c = table[row as usize][col as usize];
         match c {
-            'L' => { seat_type = Seat::EMPTY }
-            '#' => { seat_type = Seat::OCCUPIED }
-            '.' => { seat_type = Seat::FLOOR }
-            _ => { seat_type = Seat::INVALID }
+            'L' => seat_type = Seat::EMPTY,
+            '#' => seat_type = Seat::OCCUPIED,
+            '.' => seat_type = Seat::FLOOR,
+            _ => seat_type = Seat::INVALID,
         }
     }
     seat_type
 }
 
-fn count_neighbors(table:&CharMap, pos:Pos) -> i32 {
+fn count_neighbors(table: &[Vec<char>], pos: (i32, i32)) -> i32 {
     let mut neigh_count = 0;
     for row in (pos.0 - 1)..=(pos.0 + 1) {
-        for col in (pos.1 - 1)..=(pos.1 + 1) {            
+        for col in (pos.1 - 1)..=(pos.1 + 1) {
             let seat_type = get_seat_type(&table, (row, col));
             if let Seat::OCCUPIED = seat_type {
                 if row != pos.0 || col != pos.1 {
@@ -39,8 +36,8 @@ fn count_neighbors(table:&CharMap, pos:Pos) -> i32 {
     neigh_count
 }
 
-fn count_occupied(table:&CharMap) -> i32 {
-    let mut occupied_count:i32 = 0;
+fn count_occupied(table: &[Vec<char>]) -> i32 {
+    let mut occupied_count: i32 = 0;
     for row in 0..table.len() {
         for col in 0..table[row].len() {
             let seat_type = get_seat_type(&table, (row as i32, col as i32));
@@ -86,5 +83,5 @@ fn main() {
             }
             println!("Num of occupied = {}", occupied_count);
         }
-    }  
+    }
 }
