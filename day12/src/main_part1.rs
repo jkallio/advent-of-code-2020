@@ -7,44 +7,35 @@ fn parse_line(line: String) -> (char, i32) {
     panic!("Failed to parse line");
 }
 
-fn rotate(point:(i32, i32), deg:i32) -> (i32, i32) {
-    let mut d = deg;
-    while d < 0 {
-        d += 360;
-    }
-
-    match d % 360 {
-        0 => {
-            point
-        }
-
-        90 => {
-            (point.1, -point.0)
-        }
-
-        180 => {
-            (-point.0, -point.1)
-        }
-
-        270 => {
-            (-point.1, point.0)
-        }
-        _ => {
-            panic!("Invalid direction");
-        }
+fn deg_to_dir(deg: i32) -> char {
+    match deg % 360 {
+        0 => 'N',
+        90 => 'E',
+        180 => 'S',
+        270 => 'W',
+        _ => panic!("Invalid degree"),
     }
 }
 
-fn move_towards(dir: (i32, i32), value: i32) -> (i32, i32) {
-    let mut result = (0, 0);
-    for _ in 0..value {
-        result.0 += dir.0;
-        result.1 += dir.1;
+fn dir_to_deg(dir: char) -> i32 {
+    match dir {
+        'N' => 0,
+        'S' => 180,
+        'E' => 90,
+        'W' => 270,
+        _ => panic!("Invalid direction"),
     }
-    result
 }
 
-fn get_coordinates(dir: char, value: i32) -> (i32, i32) {
+fn turn(deg: i32, cur_dir: char) -> char {
+    let mut new_deg = deg + dir_to_deg(cur_dir);
+    while new_deg < 0 {
+        new_deg += 360
+    }
+    deg_to_dir(new_deg)
+}
+
+fn move_direction(dir: char, value: i32) -> (i32, i32) {
     let mut result = (0, 0);
     match dir {
         'N' => {
@@ -73,29 +64,28 @@ fn get_coordinates(dir: char, value: i32) -> (i32, i32) {
 fn main() {
     if let Ok(input) = file_utils::read_to_string_vec("input.txt") {
         let mut pos = (0, 0);
-        let mut waypoint = (10, 1);
-
+        let mut facing = 'E';
         for line in input {
             let cmd = parse_line(line);
             match cmd.0 {
                 'L' => {
-                    waypoint = rotate(waypoint, -cmd.1);
+                    facing = turn(-cmd.1, facing);
                 }
 
                 'R' => {
-                    waypoint = rotate(waypoint, cmd.1);
+                    facing = turn(cmd.1, facing);
                 }
 
                 'F' => {
-                    let result = move_towards(waypoint, cmd.1);
+                    let result = move_direction(facing, cmd.1);
                     pos.0 += result.0;
                     pos.1 += result.1;
                 }
 
                 _ => {
-                    let coords = get_coordinates(cmd.0, cmd.1);
-                    waypoint.0 += coords.0;
-                    waypoint.1 += coords.1;
+                    let result = move_direction(cmd.0, cmd.1);
+                    pos.0 += result.0;
+                    pos.1 += result.1;
                 }
             }
         }
