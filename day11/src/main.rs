@@ -5,12 +5,13 @@ enum Seat {
     FLOOR,
 }
 
+// Part1: Tolerance is 4. Part2: Tolerance is 5.
+const TOLERANCE: i32 = 4;
+
 fn get_seat_type(table: &[Vec<char>], pos: (i32, i32)) -> Seat {
     let mut seat_type = Seat::INVALID;
-    let row = pos.0;
-    let col = pos.1;
-    if row >= 0 && row < table.len() as i32 && col >= 0 && col < table[row as usize].len() as i32 {
-        let c = table[row as usize][col as usize];
+    if check_bounds(table, pos) {
+        let c = table[pos.0 as usize][pos.1 as usize];
         match c {
             'L' => seat_type = Seat::EMPTY,
             '#' => seat_type = Seat::OCCUPIED,
@@ -19,6 +20,13 @@ fn get_seat_type(table: &[Vec<char>], pos: (i32, i32)) -> Seat {
         }
     }
     seat_type
+}
+
+fn check_bounds(table: &[Vec<char>], pos: (i32, i32)) -> bool {
+    pos.0 >= 0
+        && pos.0 < table.len() as i32
+        && pos.1 >= 0
+        && pos.1 < table[pos.0 as usize].len() as i32
 }
 
 fn count_neighbors(table: &[Vec<char>], pos: (i32, i32)) -> i32 {
@@ -67,7 +75,7 @@ fn main() {
                             }
                         }
                         Seat::OCCUPIED => {
-                            if neighbors >= 4 {
+                            if neighbors >= TOLERANCE {
                                 new_table[row][col] = 'L';
                                 arrangement_stabilized = false;
                             }
