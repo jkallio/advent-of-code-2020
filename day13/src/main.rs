@@ -1,6 +1,4 @@
-use std::cmp::min;
 use regex::Regex;
-use std::cmp::Reverse;
 
 // Returns the earliest timestamp for departure with a list of bus ids
 // Each bus also contains the delta time from t=0
@@ -14,16 +12,14 @@ fn parse_bus_schedule(input: &[String]) -> (i32, Vec<(i32, i32)>) {
             departure = i;
         }
 
-        // Second line consists of bus id (also doubles as round-trip time) 
-        let mut t = 0;
-        for x in input[1].split(',') {
+        // Second line consists of bus id (also doubles as round-trip time)
+        for (t, x) in input[1].split(',').enumerate() {
             let re = Regex::new(r"([0-9])+").unwrap();
             if re.is_match(x) {
                 if let Ok(i) = x.parse() {
-                    bus_list.push((i, t));
+                    bus_list.push((i, t as i32));
                 }
-            }
-            t += 1;
+            } 
         }
         return (departure, bus_list);
     }
@@ -47,85 +43,40 @@ fn get_answer_for_part1(info: &(i32, Vec<(i32, i32)>)) -> i32 {
     closest_to_departure.0 * closest_to_departure.1
 }
 
-fn main() {
-    struct Bus {
-        id: i64,
-        t: i64,
+// Brute force through all possible indexes in i64 range. This solution is good enough
+// for test inputs with small amount of buses, but won't solve the actual puzzle input
+// as it would take too long to iterate through the entire range.
+fn brute_force_part2(info: &(i32, Vec<(i32, i32)>)) -> i64 {
+    let t0_bus_id: i64 = info.1[0].0 as i64;
+    for i in 0..i64::MAX {
+        let mut matches = 1;
+        for j in 1..info.1.len() {
+            let bus = &info.1[j];
+            let result: f64 =
+                ((t0_bus_id * i) as f64) / (bus.0 as f64) + (bus.1 as f64) / (bus.0 as f64);
+            if result.fract() == 0.0 {
+                matches += 1;
+            } else {
+                break;
+            }
+        }
+        if matches == info.1.len() {
+            return t0_bus_id * i;
+        }
     }
+    panic!("Run out of i64 range");
+}
 
+fn main() {
     if let Ok(input) = file_utils::read_to_string_vec("test_input1.txt") {
         let info = parse_bus_schedule(&input);
-        
+
         // Part-1
         let part1 = get_answer_for_part1(&info);
         println!("Answer for part-1 is {}", part1);
 
         // Part-2
-        let mut buses = Vec::new();
-        for i in 0..info.1.len() {
-            let bus = info.1[i];
-            buses.push(Bus { 
-                id:bus.0 as i64,
-                t:bus.1 as i64,
-            });
-        }
-        //buses.sort_by_key(|k| Reverse(k.id));
-        //buses.sort_by_key(|k| k.id);
-
-        let t0_bus_id = buses[0].id;
-        //let t0_bus_t = buses[0].t;
-
-        let mut biggest_match = 0;
-        for i in 0..i64::MAX {
-
-            let mut matches = 1;
-            for j in 1..buses.len() {
-                let bus = &buses[j];
-                let result:f64 = ((t0_bus_id * i) as f64)/(bus.id as f64) + (bus.t as f64) / (bus.id as f64);
-                if result.fract() == 0.0 {
-                    matches += 1;
-                }
-                else { break; }
-            }
-            if matches > biggest_match {
-                biggest_match = matches;
-                println!("Iteration #{}; Biggest match={} (#{})", i, biggest_match, i);
-            }
-            if matches == buses.len() {
-                println!("Result = {}", t0_bus_id * i);
-                break;
-            }
-        }
-
-
-        /*
-        let mut target_t0 = 100000000000000;//0;
-        let mut biggest_match = 1;
-        loop {
-            let mut matches = 0;
-            for bus in buses.iter_mut() {
-                let target = target_t0 + bus.t;
-                while bus.timestamp < target {
-                    bus.timestamp += bus.id;
-                }
-                if bus.timestamp > target {
-                    target_t0 = bus.timestamp- bus.t;
-                    break;
-                }
-                else if bus.timestamp == target {
-                    matches += 1;
-                    if matches > biggest_match {
-                        biggest_match = matches;
-                        println!("Matches = {}; target_t0 = {}", matches, target_t0);
-                    }
-                }
-            }  
-            if matches == buses.len() {
-                println!("FOUND!");
-                break;
-            }
-        }
-        println!("{}", target_t0);
-        */
+        let part2: i64 = brute_force_part2(&info);
+        println!("Answer for part-2 is {}", part2);
     }
 }
