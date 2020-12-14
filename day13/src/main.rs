@@ -67,8 +67,53 @@ fn brute_force_part2(info: &(i32, Vec<(i32, i32)>)) -> i64 {
     panic!("Run out of i64 range");
 }
 
+// Chinese remainder theorem can be applied if the Greatest Common Divisor (GDC) == 1 
+// for all of the modulo values. Here the input consists only of prime numbers.
+fn chinese_remainder_theorem(info: &(i32, Vec<(i32, i32)>)) -> i64 {
+    struct Bus {
+        id:i64,
+        remainder:i64,
+        sum:i64
+    }
+    let mut vec = Vec::new();
+    for x in &info.1 {
+        vec.push(Bus { id: x.0 as i64, remainder: x.1 as i64, sum: 1 });
+    }
+
+    for i in 0..vec.len() {
+        for j in 0..vec.len() {
+            if i != j {
+                vec[i].sum *= vec[j].id;
+            }
+        }
+    }
+
+    for i in 0..vec.len() {
+        let bus = &mut vec[i];
+        let mut remainder_target:i64 = 0;
+        if bus.remainder > 0 {
+            remainder_target = bus.id - (bus.remainder % bus.id);
+        }
+        for x in 1..i64::MAX {
+            let test:i64 = bus.sum * x as i64;
+            if test % bus.id == remainder_target {
+                bus.sum = test;
+                break;
+            }
+        }
+    }
+
+    let mut result:i64 = 0;
+    let mut tot_modulo = 1;
+    for bus in vec {
+        result += bus.sum;
+        tot_modulo *= bus.id;
+    }
+    result % tot_modulo
+}
+
 fn main() {
-    if let Ok(input) = file_utils::read_to_string_vec("test_input1.txt") {
+    if let Ok(input) = file_utils::read_to_string_vec("input.txt") {
         let info = parse_bus_schedule(&input);
 
         // Part-1
@@ -76,7 +121,10 @@ fn main() {
         println!("Answer for part-1 is {}", part1);
 
         // Part-2
-        let part2: i64 = brute_force_part2(&info);
+        //let part2: i64 = brute_force_part2(&info);
+        //println!("Answer for part-2 is {}", part2);
+
+        let part2:i64 = chinese_remainder_theorem(&info);
         println!("Answer for part-2 is {}", part2);
     }
 }

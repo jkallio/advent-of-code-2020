@@ -1,0 +1,51 @@
+Chinese Remainder Theorem
+
+// Chinese remainder theorem can be applied if the Greatest Common Divisor (GDC) == 1 for all of the modulo values.
+
+target = 1 068 781 = 1 068 781
+0 mod 7 = 0
+1 mod 13 = 1
+4 mod 59 = 4
+6 mod 31 = 6
+7 mod 19 = 7
+
+mod_tot = 7 * 13 * 59 * 31 * 19 = 3 162 341
+
+// Multiply by other modulos as that makes them disappear when applying other modulos
+a = 13 * 59 * 31 * 19		// mod-7 = 451 763
+b = 7 * 59 * 31 * 19		// mod-13 = 243 257
+c = 7 * 13 * 31 * 19		// mod-59 = 53 599
+d = 7 * 13 * 59 * 19		// mod-31 = 102 011
+e = 7 * 13 * 59 * 31		// mod-19 = 166 439
+
+// a mod 7 => 4 (when it should be 0)
+a mod 7 = 4
+a = a * 7 = 3 162 341
+a mod 7 = 0
+
+// b mod 13 => 1 (when it should be 13-1 = 12)
+b mod 13 = 1
+b = b * 12 = 2 919 084
+b mod 13 = 12
+
+// c mod 59 => 27 (when it should be 59-4 = 55)
+c mod 59 = 27
+c = c * 37 = 1 983 163
+c mod 59 = 55
+
+// d mod 31 => 21 (when it should be 31-6 = 25)
+d mod 31 = 21
+d = d * 13 = 1 326 143
+d mod 31 = 25
+
+// e mod 19 => 18 (when it should be 19-7=12)
+e mod 19 = 18
+e = e * 7 = 1 165 073
+e mod 19 = 12
+
+x = (a + b + c + d + e) mod (7 * 13 * 59 * 31 * 19) = 1 068 781
+
+target - x // YAY!  = 0
+
+
+
