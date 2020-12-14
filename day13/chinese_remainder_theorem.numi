@@ -2,12 +2,14 @@ Chinese Remainder Theorem
 
 // Chinese remainder theorem can be applied if the Greatest Common Divisor (GDC) == 1 for all of the modulo values.
 
+//     t/remainder:  0   1   2   3   4   5   6   7
+// Bus id/modulo:  { 7,  13, x,  x,  59, x,  31, 19 }
+  0 mod 7   = 0
+  1 mod 13  = 1
+  4 mod 59  = 4
+  6 mod 31  = 6
+  7 mod 19  = 7
 target = 1 068 781 = 1 068 781
-0 mod 7 = 0
-1 mod 13 = 1
-4 mod 59 = 4
-6 mod 31 = 6
-7 mod 19 = 7
 
 mod_tot = 7 * 13 * 59 * 31 * 19 = 3 162 341
 
