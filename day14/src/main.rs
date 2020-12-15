@@ -38,7 +38,7 @@ fn parse_mask(line: &str) -> (i64, i64, i64) {
         for i in (0..bit_string.len()).rev() {
             match bit_string.chars().nth(i).unwrap() {
                 'X' => {
-                    floating_mask += 1 << (bit_string.len() - i -1);
+                    floating_mask += 1 << (bit_string.len() - i - 1);
                 }
                 '1' => {
                     one_mask += 1 << (bit_string.len() - i - 1);
@@ -55,12 +55,16 @@ fn parse_mask(line: &str) -> (i64, i64, i64) {
     (zero_mask, one_mask, floating_mask)
 }
 
-fn recursive_get_address_list(mut mem:&mut HashMap<i64, i64>, addr:i64, value:i64, floating_mask:i64) -> Vec<i64> {
+fn recursive_get_address_list(
+    mut mem: &mut HashMap<i64, i64>,
+    addr: i64,
+    value: i64,
+    floating_mask: i64,
+) -> Vec<i64> {
     let mut vec = Vec::<i64>::new();
     for i in (0..36).rev() {
         let floater = 1 << (35 - i);
         if floating_mask & floater != 0 {
-            
             let a0 = addr & !floater;
             let mut v0 = recursive_get_address_list(&mut mem, a0, value, floating_mask & !floater);
             if !v0.contains(&a0) {
@@ -77,9 +81,8 @@ fn recursive_get_address_list(mut mem:&mut HashMap<i64, i64>, addr:i64, value:i6
 
             break;
         }
-
     }
-    return vec;
+    vec
 }
 
 fn main() {
@@ -95,22 +98,19 @@ fn main() {
 
                 let vec = recursive_get_address_list(&mut mem, addr, value, masks.2);
                 for it in vec {
-                    println!("Write mem[{}] = {}", it, value);
+                    //println!("Write mem[{}] = {}", it, value);
                     mem.insert(it, value);
                 }
-
             } else if line.starts_with("mask") {
                 masks = parse_mask(&line);
             }
         }
 
-        println!("------------------------");
         let mut tot_sum: i64 = 0;
         for m in mem {
-            println!("mem[{}] = {}", m.0, m.1);
+            //println!("mem[{}] = {}", m.0, m.1);
             tot_sum += m.1;
         }
-        println!("------------------------");
         println!("Total sum of the values in memory is {}", tot_sum);
     }
 }
