@@ -74,9 +74,7 @@ fn parse_input_file(
     Ok(true)
 }
 
-fn sum_invalid(ranges: &HashMap<String, Vec<ValueRange>>, ticket: &[i32]) -> i64 {
-    let mut sum: i64 = 0;
-
+fn check_ticket_validity(ranges: &HashMap<String, Vec<ValueRange>>, ticket: &[i32]) -> bool {
     for value in ticket {
         let mut is_valid = false;
         'outer: for category in ranges {
@@ -88,10 +86,10 @@ fn sum_invalid(ranges: &HashMap<String, Vec<ValueRange>>, ticket: &[i32]) -> i64
             }
         }
         if !is_valid {
-            sum += *value as i64;
+            return false;
         }
     }
-    sum
+    true
 }
 
 fn main() {
@@ -100,10 +98,8 @@ fn main() {
     let mut tickets = Vec::<Vec<i32>>::new();
 
     if parse_input_file(input, &mut ranges, &mut tickets).is_ok() {
-        let mut tot_sum: i64 = 0;
-        for ticket in tickets {
-            tot_sum += sum_invalid(&ranges, &ticket);
-        }
-        println!("Total sum of invalid values is {}", tot_sum);
+
+        // Remove invalid tickets
+        tickets.retain(|t| check_ticket_validity(&ranges, &t));
     }
 }
