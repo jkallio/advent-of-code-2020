@@ -3,22 +3,29 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Error, ErrorKind};
 
+type RangeMap = HashMap<String, ValueRange>;
+type RangeList = Vec<(String, ValueRange)>;
+type TicketList = Vec<Vec<i32>>;
+
 #[derive(Debug)]
 struct ValueRange {
-    min: i32,
-    max: i32,
+    lower_min: i32,
+    lower_max: i32,
+    upper_min: i32,
+    upper_max: i32,
 }
 
 impl ValueRange {
     fn value_in_range(&self, v: i32) -> bool {
-        v >= self.min && v <= self.max
+        (v >= self.lower_min && v <= self.lower_max) || (v >= self.upper_min && v <= self.upper_max)
     }
 }
 
+// Parse input file
 fn parse_input_file(
     path: &str,
-    ranges: &mut HashMap<String, Vec<ValueRange>>,
-    tickets: &mut Vec<Vec<i32>>,
+    ranges: &mut RangeMap,
+    tickets: &mut TicketList,
 ) -> Result<bool, std::io::Error> {
     let file = File::open(path)?;
     let br = BufReader::new(file);
@@ -31,27 +38,43 @@ fn parse_input_file(
             } else {
                 match section {
                     0 => {
-                        // Ranges
+                        // 1st section consists of pair of value ranges (e.g. 28-184 or 203-952)
                         let mut parts_iter = line.split(':');
                         let key = parts_iter.next().unwrap();
 
                         let re = Regex::new(r"[0-9]+-[0-9]+").unwrap();
                         let rngs = re.find_iter(&line).map(|m| m.as_str());
                         
-                        let mut value = Vec::<ValueRange>::new();
-                        for r in rngs {
+                        let mut value_range = ValueRange { 
+                            lower_max:0,
+                            lower_min:0,
+                            upper_max:0,
+                            upper_min:0 };
+
+                        for (i, r) in rngs.enumerate() {
                             let mut r_iter = r.split('-');
-                            value.push(ValueRange {
-                                min: r_iter.next().unwrap().parse().unwrap(),
-                                max: r_iter.next().unwrap().parse().unwrap(),
-                            });
+                            let min_value = r_iter.next().unwrap().parse().unwrap();
+                            let max_value = r_iter.next().unwrap().parse().unwrap();
+                            match i {
+                                0 => { 
+                                    value_range.lower_min = min_value;
+                                    value_range.lower_max = max_value;
+                                }
+                                1 => {
+                                    value_range.upper_min = min_value;
+                                    value_range.upper_max = max_value;
+                                }
+                                _ => { panic!("Invalid range"); }
+                            }
+
                         }
-                        ranges.insert(String::from(key), value);
+                        ranges.insert(String::from(key), value_range);
                     }
-                    1 => { // Your Ticket
-                    }
-                    2 => {
-                        // Nearby Ticket
+
+                    // 2nd section consist of values in your own ticket (comma separated)
+                    // 3rd section consists of values in your neighbors tickets
+                    1 | 2 => {
+                        // Own Nearby Ticket
                         if line.contains(',') {
                             let parts_iter = line.split(',');
                             let mut values = Vec::<i32>::new();
@@ -74,15 +97,14 @@ fn parse_input_file(
     Ok(true)
 }
 
-fn check_ticket_validity(ranges: &HashMap<String, Vec<ValueRange>>, ticket: &[i32]) -> bool {
-    for value in ticket {
+// Returns true if ticket is included at least in one range
+fn is_ticket_valid(ticket_values: &[i32], ranges: &RangeMap) -> bool {
+    for value in ticket_values {
         let mut is_valid = false;
-        'outer: for category in ranges {
-            for rng in category.1 {
-                if rng.value_in_range(*value) {
-                    is_valid = true;
-                    break 'outer;
-                }
+        for range in ranges.values() {
+            if range.value_in_range(*value) {
+                is_valid = true;
+                break;
             }
         }
         if !is_valid {
@@ -92,14 +114,44 @@ fn check_ticket_validity(ranges: &HashMap<String, Vec<ValueRange>>, ticket: &[i3
     true
 }
 
+// Returns true if each of ticket[i] value is within given range
+fn is_ticket_index_in_range(i: usize, range: &ValueRange, tickets: &TicketList) -> bool {
+    for ticket in tickets {
+        if let Some(value) = ticket.get(i) {
+            if !range.value_in_range(*value) {
+                return false;
+            }
+        }
+        else {
+            panic!("Index not found from ticket");
+        }
+    }
+    true
+}
+
 fn main() {
     let input = "input.txt";
-    let mut ranges = HashMap::<String, Vec<ValueRange>>::new();
-    let mut tickets = Vec::<Vec<i32>>::new();
+    let mut ranges = RangeMap::new();
+    let mut tickets = TicketList::new();
 
     if parse_input_file(input, &mut ranges, &mut tickets).is_ok() {
-
         // Remove invalid tickets
-        tickets.retain(|t| check_ticket_validity(&ranges, &t));
+        tickets.retain(|t| is_ticket_valid(&t, &ranges));
+
+        // Collect range-keys for each ticket value index
+        let mut range_candidates = HashMap::<usize, Vec<String>>::new();
+        for i in 0..ranges.len() {
+            let mut vec = vec!();
+            for range in &ranges {
+                if is_ticket_index_in_range(i, &range.1, &tickets) {
+                    vec.push(String::from(range.0));
+                }
+            }
+            range_candidates.insert(i, vec);
+        }
+
+        for (k, v) in range_candidates {
+            println!("#{} size is {}", k, v.len());
+        }
     }
 }
