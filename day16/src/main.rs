@@ -43,19 +43,20 @@ fn parse_input_file(
 
                         let re = Regex::new(r"[0-9]+-[0-9]+").unwrap();
                         let rngs = re.find_iter(&line).map(|m| m.as_str());
-                        
-                        let mut value_range = ValueRange { 
-                            lower_max:0,
-                            lower_min:0,
-                            upper_max:0,
-                            upper_min:0 };
+
+                        let mut value_range = ValueRange {
+                            lower_max: 0,
+                            lower_min: 0,
+                            upper_max: 0,
+                            upper_min: 0,
+                        };
 
                         for (i, r) in rngs.enumerate() {
                             let mut r_iter = r.split('-');
                             let min_value = r_iter.next().unwrap().parse().unwrap();
                             let max_value = r_iter.next().unwrap().parse().unwrap();
                             match i {
-                                0 => { 
+                                0 => {
                                     value_range.lower_min = min_value;
                                     value_range.lower_max = max_value;
                                 }
@@ -63,9 +64,10 @@ fn parse_input_file(
                                     value_range.upper_min = min_value;
                                     value_range.upper_max = max_value;
                                 }
-                                _ => { panic!("Invalid range"); }
+                                _ => {
+                                    panic!("Invalid range");
+                                }
                             }
-
                         }
                         ranges.insert(String::from(key), value_range);
                     }
@@ -114,7 +116,7 @@ fn is_ticket_valid(ticket_values: &[i32], ranges: &RangeMap) -> bool {
 }
 
 // Returns true if each of ticket[i] value is within given range
-fn is_ticket_index_in_range(i: usize, range: &ValueRange, tickets: &TicketList) -> bool {
+fn is_ticket_index_in_range(i: usize, range: &ValueRange, tickets: &[Vec<i32>]) -> bool {
     for ticket in tickets {
         let value = ticket.get(i).unwrap();
         if !range.value_in_range(*value) {
@@ -126,7 +128,7 @@ fn is_ticket_index_in_range(i: usize, range: &ValueRange, tickets: &TicketList) 
 
 fn main() {
     let input = "input.txt";
-    let mut ranges = RangeMap::new(); 
+    let mut ranges = RangeMap::new();
     let mut tickets = TicketList::new();
 
     if parse_input_file(input, &mut ranges, &mut tickets).is_ok() {
@@ -139,7 +141,7 @@ fn main() {
         // Collect range-index for each ticket value slot
         let mut range_candidates = Vec::<(usize, Vec<String>)>::new();
         for i in 0..ranges.len() {
-            let mut vec = vec!();
+            let mut vec = vec![];
             for range in &ranges {
                 if is_ticket_index_in_range(i, &range.1, &tickets) {
                     vec.push(String::from(range.0));
@@ -150,17 +152,17 @@ fn main() {
 
         // Sort starting from smallest list
         range_candidates.sort_by_key(|t| t.1.len());
-        
+
         // Eliminate the fields one by one
         let mut ticket_values = HashMap::<String, i32>::new();
         loop {
             // Find a list that contains only one possible filed
-            let mut key:String = "".to_string();
+            let mut key: String = "".to_string();
             for it in range_candidates.iter() {
                 if it.1.len() == 1 {
                     key = String::from(it.1.first().unwrap());
                     let value = *your_ticket.get(it.0).unwrap();
-                    ticket_values.insert(String::from(&key), value);    // Store the value from your ticket that matches the index slot
+                    ticket_values.insert(String::from(&key), value); // Store the value from your ticket that matches the index slot
                     break;
                 }
             }
@@ -169,14 +171,13 @@ fn main() {
                 for it in range_candidates.iter_mut() {
                     it.1.retain(|k| !k.contains(&key));
                 }
-            }
-            else {
+            } else {
                 break;
             }
         }
-        
+
         // Final answer is the result of all the fields that starts with "departure"
-        let mut multiplication_result:i64 = 1;
+        let mut multiplication_result: i64 = 1;
         for value in ticket_values {
             if value.0.starts_with("departure") {
                 multiplication_result *= value.1 as i64;
