@@ -4,7 +4,6 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, Error, ErrorKind};
 
 type RangeMap = HashMap<String, ValueRange>;
-type RangeList = Vec<(String, ValueRange)>;
 type TicketList = Vec<Vec<i32>>;
 
 #[derive(Debug)]
@@ -117,13 +116,9 @@ fn is_ticket_valid(ticket_values: &[i32], ranges: &RangeMap) -> bool {
 // Returns true if each of ticket[i] value is within given range
 fn is_ticket_index_in_range(i: usize, range: &ValueRange, tickets: &TicketList) -> bool {
     for ticket in tickets {
-        if let Some(value) = ticket.get(i) {
-            if !range.value_in_range(*value) {
-                return false;
-            }
-        }
-        else {
-            panic!("Index not found from ticket");
+        let value = ticket.get(i).unwrap();
+        if !range.value_in_range(*value) {
+            return false;
         }
     }
     true
@@ -131,15 +126,18 @@ fn is_ticket_index_in_range(i: usize, range: &ValueRange, tickets: &TicketList) 
 
 fn main() {
     let input = "input.txt";
-    let mut ranges = RangeMap::new();
+    let mut ranges = RangeMap::new(); 
     let mut tickets = TicketList::new();
 
     if parse_input_file(input, &mut ranges, &mut tickets).is_ok() {
         // Remove invalid tickets
         tickets.retain(|t| is_ticket_valid(&t, &ranges));
 
+        // Your own ticket is the first one in the list
+        let your_ticket = tickets.first().unwrap().clone();
+
         // Collect range-keys for each ticket value index
-        let mut range_candidates = HashMap::<usize, Vec<String>>::new();
+        let mut range_candidates = Vec::<(usize, Vec<String>)>::new();
         for i in 0..ranges.len() {
             let mut vec = vec!();
             for range in &ranges {
@@ -147,11 +145,37 @@ fn main() {
                     vec.push(String::from(range.0));
                 }
             }
-            range_candidates.insert(i, vec);
+            range_candidates.push((i, vec));
         }
 
-        for (k, v) in range_candidates {
-            println!("#{} size is {}", k, v.len());
+        // Sort starting from smallest list
+        range_candidates.sort_by_key(|t| t.1.len());
+
+        // Collect keys to vector (only if already not in)
+        let mut fields:Vec<String> = vec!();
+        for element in range_candidates {
+            for key in element.1 {
+                if !fields.contains(&key) {
+                    fields.push(key);
+                }
+            }
         }
+
+        let mut answer:i64 = 1;
+        for i in 0..your_ticket.len() {
+            let value = your_ticket.get(i).unwrap();
+            let field = fields.get(i).unwrap();
+            
+            if field.contains("departure") {
+                println!("------> {} = {}", field, value);
+                answer *= *value as i64;
+            }
+            else {
+                println!("{} = {}", field, value);
+            }
+        }
+
+        // 8092176737509 is too high
+        println!("\r\nSix values multiplied is => {}", answer);
     }
 }
