@@ -1,14 +1,11 @@
-use std::fs::File;
-use std::io::BufReader;
-use std::io::BufRead;
-use std::collections::HashMap;
-use std::hash::Hash;
 use std::cmp::max;
+use std::collections::HashMap;
+use std::fs::File;
+use std::hash::Hash;
+use std::io::BufRead;
+use std::io::BufReader;
 
-#[derive(Hash)]
-#[derive(PartialEq)]
-#[derive(Eq)]
-#[derive(Clone)]
+#[derive(Hash, PartialEq, Eq, Clone)]
 struct XYZ {
     x: i32,
     y: i32,
@@ -24,24 +21,29 @@ type CubeMap = HashMap<XYZ, bool>;
 
 // Parse input file into a xyz map where each position represents the
 // state of a single energy source (´true´ if energy soruce is active)
-fn parse_input_file(input:&str) -> (CubeMap, Bounds) {
+fn parse_input_file(input: &str) -> (CubeMap, Bounds) {
     let file = File::open(input).unwrap();
     let br = BufReader::new(file);
 
     let mut cubes = HashMap::<XYZ, bool>::new();
-    let mut pos = XYZ { x:0, y:0, z:0 };
+    let mut pos = XYZ { x: 0, y: 0, z: 0 };
     let mut bounds = Bounds {
-        min: XYZ { x:0, y:0, z:0 },
-        max: XYZ { x:0, y:0, z:0 }
+        min: XYZ { x: 0, y: 0, z: 0 },
+        max: XYZ { x: 0, y: 0, z: 0 },
     };
     for line in br.lines() {
         if let Ok(line) = line {
             for c in line.chars() {
                 match c {
-                    '.' => { cubes.insert(pos.clone(), false); }
-                    '#' => { cubes.insert(pos.clone(), true); }
-                    _ => { panic!("Invalid input file"); }
-
+                    '.' => {
+                        cubes.insert(pos.clone(), false);
+                    }
+                    '#' => {
+                        cubes.insert(pos.clone(), true);
+                    }
+                    _ => {
+                        panic!("Invalid input file");
+                    }
                 }
                 pos.x = (pos.x + 1) % line.len() as i32;
                 bounds.max.x = max(bounds.max.x, pos.x + 1);
@@ -56,7 +58,7 @@ fn parse_input_file(input:&str) -> (CubeMap, Bounds) {
 }
 
 // Returns true if energy cell is active at given position
-fn is_active(cubes: &CubeMap, pos:&XYZ) -> bool {
+fn is_active(cubes: &CubeMap, pos: &XYZ) -> bool {
     let mut active = false;
     if let Some(value) = cubes.get(&pos) {
         active = *value;
@@ -70,7 +72,7 @@ fn count_active_cubes(cubes: &CubeMap, bounds: &Bounds) -> i32 {
     for z in bounds.min.z..=bounds.max.z {
         for y in bounds.min.y..=bounds.max.y {
             for x in bounds.min.x..=bounds.max.x {
-                if is_active(&cubes, &XYZ { x, y, z}) {
+                if is_active(&cubes, &XYZ { x, y, z }) {
                     active_count += 1;
                 }
             }
@@ -85,16 +87,29 @@ fn execute_bootup_cycle(cubes: &mut CubeMap, bounds: &Bounds) {
     for own_z in bounds.min.z..=bounds.max.z {
         for own_y in bounds.min.y..=bounds.max.y {
             for own_x in bounds.min.x..=bounds.max.x {
-                let own_pos = XYZ { x: own_x, y: own_y, z: own_z };
+                let own_pos = XYZ {
+                    x: own_x,
+                    y: own_y,
+                    z: own_z,
+                };
                 let mut active_neigbors = count_active_cubes(
-                    &cubes, &Bounds {
-                        min: XYZ { x: own_x - 1, y: own_y - 1, z: own_z - 1}, 
-                        max: XYZ { x: own_x + 1, y: own_y + 1, z: own_z + 1}, 
-                    }
+                    &cubes,
+                    &Bounds {
+                        min: XYZ {
+                            x: own_x - 1,
+                            y: own_y - 1,
+                            z: own_z - 1,
+                        },
+                        max: XYZ {
+                            x: own_x + 1,
+                            y: own_y + 1,
+                            z: own_z + 1,
+                        },
+                    },
                 );
-                
-                // If a cube is active and exactly 2 or 3 of its neighbors 
-                // are also active, the cube remains active. Otherwise, 
+
+                // If a cube is active and exactly 2 or 3 of its neighbors
+                // are also active, the cube remains active. Otherwise,
                 // the cube becomes inactive.
                 if is_active(&cubes, &own_pos) {
                     active_neigbors -= 1;
@@ -105,13 +120,10 @@ fn execute_bootup_cycle(cubes: &mut CubeMap, bounds: &Bounds) {
                 // If a cube is inactive but exactly 3 of its neighbors are
                 // active, the cube becomes active. Otherwise, the cube remains
                 // inactive.
-                else {
-                    if active_neigbors == 3 {
-                        vec.push(own_pos);
-                    }
+                else if active_neigbors == 3 {
+                    vec.push(own_pos);
                 }
             }
-
         }
     }
 
@@ -137,11 +149,9 @@ fn main() {
 
         // Execute bootup cycle
         execute_bootup_cycle(&mut cubes, &bounds);
-        
+
         // Count active energy sources
         let active = count_active_cubes(&cubes, &bounds);
         println!("Cycle #{}: Active energy soruces {}", i, active);
     }
-
-
 }
