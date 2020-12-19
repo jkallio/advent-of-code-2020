@@ -27,10 +27,25 @@ fn parse_input_file(input: &str) -> (CubeMap, Bounds) {
     let br = BufReader::new(file);
 
     let mut cubes = HashMap::<XYZW, bool>::new();
-    let mut pos = XYZW { x: 0, y: 0, z: 0, w:0 };
+    let mut pos = XYZW {
+        x: 0,
+        y: 0,
+        z: 0,
+        w: 0,
+    };
     let mut bounds = Bounds {
-        min: XYZW { x: 0, y: 0, z: 0, w:0 },
-        max: XYZW { x: 0, y: 0, z: 0, w:0 },
+        min: XYZW {
+            x: 0,
+            y: 0,
+            z: 0,
+            w: 0,
+        },
+        max: XYZW {
+            x: 0,
+            y: 0,
+            z: 0,
+            w: 0,
+        },
     };
     for line in br.lines() {
         if let Ok(line) = line {
@@ -74,7 +89,7 @@ fn count_active_cubes(cubes: &CubeMap, bounds: &Bounds) -> i32 {
         for z in bounds.min.z..=bounds.max.z {
             for y in bounds.min.y..=bounds.max.y {
                 for x in bounds.min.x..=bounds.max.x {
-                    if is_active(&cubes, &XYZW { x, y, z, w}) {
+                    if is_active(&cubes, &XYZW { x, y, z, w }) {
                         active_count += 1;
                     }
                 }
