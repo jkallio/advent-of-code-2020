@@ -136,7 +136,7 @@ fn main() {
         // Your own ticket is the first one in the list
         let your_ticket = tickets.first().unwrap().clone();
 
-        // Collect range-keys for each ticket value index
+        // Collect range-index for each ticket value slot
         let mut range_candidates = Vec::<(usize, Vec<String>)>::new();
         for i in 0..ranges.len() {
             let mut vec = vec!();
@@ -150,32 +150,38 @@ fn main() {
 
         // Sort starting from smallest list
         range_candidates.sort_by_key(|t| t.1.len());
-
-        // Collect keys to vector (only if already not in)
-        let mut fields:Vec<String> = vec!();
-        for element in range_candidates {
-            for key in element.1 {
-                if !fields.contains(&key) {
-                    fields.push(key);
+        
+        // Eliminate the fields one by one
+        let mut ticket_values = HashMap::<String, i32>::new();
+        loop {
+            // Find a list that contains only one possible filed
+            let mut key:String = "".to_string();
+            for it in range_candidates.iter() {
+                if it.1.len() == 1 {
+                    key = String::from(it.1.first().unwrap());
+                    let value = *your_ticket.get(it.0).unwrap();
+                    ticket_values.insert(String::from(&key), value);    // Store the value from your ticket that matches the index slot
+                    break;
                 }
             }
-        }
-
-        let mut answer:i64 = 1;
-        for i in 0..your_ticket.len() {
-            let value = your_ticket.get(i).unwrap();
-            let field = fields.get(i).unwrap();
-            
-            if field.contains("departure") {
-                println!("------> {} = {}", field, value);
-                answer *= *value as i64;
+            if !key.is_empty() {
+                // Eliminate the found field key from other lists
+                for it in range_candidates.iter_mut() {
+                    it.1.retain(|k| !k.contains(&key));
+                }
             }
             else {
-                println!("{} = {}", field, value);
+                break;
             }
         }
-
-        // 8092176737509 is too high
-        println!("\r\nSix values multiplied is => {}", answer);
+        
+        // Final answer is the result of all the fields that starts with "departure"
+        let mut multiplication_result:i64 = 1;
+        for value in ticket_values {
+            if value.0.starts_with("departure") {
+                multiplication_result *= value.1 as i64;
+            }
+        }
+        println!("Final answer is {}", multiplication_result);
     }
 }
