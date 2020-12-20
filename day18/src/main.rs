@@ -2,18 +2,30 @@ use std::fs::File;
 use std::io::{ BufReader, BufRead };
 use regex::Regex;
 
-fn solve(s:&str) -> i64 {
+// Solves the equations inside parentheses and returns the given equation in form where all parentheses have been resolved
+// Call itself recursively (each recursion solves one equation inside parentheses)
+fn recursive_simplify_parentheses(s: &str) -> String {
+    let re = Regex::new(r"\(([0-9]+(\s)*(\*|\+)(\s)*[0-9]+(\s)*((\*|\+)(\s)*[0-9]+(\s)*)*\))").unwrap();
+    let mut equation = String::from(s);
+    println!("{}", equation);
+    if let Some(m) = re.find(&s) {
+        let solved = solve_equation(&s[m.start()+1..m.end()-1]);
+        equation.replace_range(m.start()..m.end(), &solved.to_string());
+        println!("{}", equation);
+        equation = recursive_simplify_parentheses(&equation);
+    }
+    equation
+}
+
+// Solves the equation by first simplifying parentheses and then adding/multiplying values from left to right
+// Note that in this problem '+' and '*' have the same precedence (unlike in real Math)
+fn solve_equation(s:&str) -> i64 {
     enum Sign {
         MULTIPLICATION,
         ADDITION,
     }
-    let equation = String::from(s);
-    /*
-    while equation.contains('(') {
-        simplify_parentheses(&mut equation);
-    }
-    //equation.retain(|c| c != '(' && c != ')');
-    */
+    let mut equation = String::from(s);
+    equation = recursive_simplify_parentheses(&equation);
     let mut sign = Sign::ADDITION;
     let mut result:i64 = 0;
     for p in equation.split(' ') {
@@ -34,18 +46,7 @@ fn solve(s:&str) -> i64 {
     result
 }
 
-fn simplify_parentheses(s: &mut String) -> bool {
-    
-    let searh_str = s.clone();
-    let re = Regex::new(r"\(([0-9]+(\s)*(\*|\+)(\s)*[0-9]+(\s)*((\*|\+)(\s)*[0-9]+(\s)*)*\))").unwrap();
-    if let Some(m) = re.find(&searh_str) {
-        let solved = solve(&s[m.start()+1..m.end()-1]);
-        s.replace_range(m.start()..m.end(), &solved.to_string());
-        return simplify_parentheses(s);
-    }
-    false
-}
-
+// Solves all the equations from given input file and sums the results together
 fn main() {
     let input = "input.txt";
     let file = File::open(input).unwrap();
@@ -53,15 +54,10 @@ fn main() {
         
     let mut results = vec![];
     for line in br.lines() {
-        let mut line = line.unwrap();
+        let line = line.unwrap();
         println!("{}", line);
-        loop {
-            if simplify_parentheses(&mut line) == false {
-                let result:i64 = solve(&line);
-                results.push(result);
-                break;
-            }
-        }
+        let result = solve_equation(&line);
+        results.push(result);
         println!("----------------------------------");
     }
 
