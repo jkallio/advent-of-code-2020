@@ -5,28 +5,48 @@ use std::io::{BufRead, BufReader};
 // Solves the equations inside parentheses and returns the given equation in form where all parentheses have been resolved
 // Call itself recursively (each recursion solves one equation inside parentheses)
 fn recursive_simplify_parentheses(s: &str) -> String {
-    let re =
-        Regex::new(r"\(([0-9]+(\s)*(\*|\+)(\s)*[0-9]+(\s)*((\*|\+)(\s)*[0-9]+(\s)*)*\))").unwrap();
+    let re = Regex::new(r"\(([0-9]+(\s)*(\*|\+)(\s)*[0-9]+(\s)*((\*|\+)(\s)*[0-9]+(\s)*)*\))").unwrap();
     let mut equation = String::from(s);
-    println!("{}", equation);
     if let Some(m) = re.find(&s) {
-        let solved = solve_equation(&s[m.start() + 1..m.end() - 1]);
+        let solved = solve_equation_with_precedence(&s[m.start() + 1..m.end() - 1]);
         equation.replace_range(m.start()..m.end(), &solved.to_string());
-        println!("{}", equation);
         equation = recursive_simplify_parentheses(&equation);
     }
     equation
 }
 
+// As '+' is to be counted before '*' this utility function adds parentheses around the sum operation in the equation
+fn recursive_add_parentheses(s: &str) -> String {
+    let re = Regex::new(r"[0-9]+ \+ [0-9]+").unwrap();
+    let mut equation = String::from(s);
+    if let Some(m) = re.find(&s) {
+        let solved = solve_equation_with_precedence(&s[m.start()..m.end()]);
+        equation.replace_range(m.start()..m.end(), &solved.to_string());
+        equation = recursive_add_parentheses(&equation);
+    }
+    equation
+}
+
 // Solves the equation by first simplifying parentheses and then adding/multiplying values from left to right
-// Note that in this problem '+' and '*' have the same precedence (unlike in real Math)
-fn solve_equation(s: &str) -> i64 {
+// Note that in this problem '+' and '*' have the swapped precedence ('+' is counted before '*')
+fn solve_equation_with_precedence(s: &str) -> i64 {
     enum Sign {
         MULTIPLICATION,
         ADDITION,
     }
+    
     let mut equation = String::from(s);
-    equation = recursive_simplify_parentheses(&equation);
+    
+    // Solve the parentheses first
+    if equation.contains('(') {
+        equation = recursive_simplify_parentheses(&equation);
+    }
+    // Add parentheses around sum operations so that they will be calculated first
+    if equation.contains('+') && equation.contains('*') {
+        equation = recursive_add_parentheses(&equation);
+    }
+    
+    // Solve the simplified equation where all parentheses have been removed
     let mut sign = Sign::ADDITION;
     let mut result: i64 = 0;
     for p in equation.split(' ') {
@@ -51,7 +71,7 @@ fn solve_equation(s: &str) -> i64 {
             }
         }
     }
-    println!("{} = {}", equation, result);
+    println!("   -> {} = {}", equation, result);
     result
 }
 
@@ -65,7 +85,7 @@ fn main() {
     for line in br.lines() {
         let line = line.unwrap();
         println!("{}", line);
-        let result = solve_equation(&line);
+        let result = solve_equation_with_precedence(&line);
         results.push(result);
         println!("----------------------------------");
     }
