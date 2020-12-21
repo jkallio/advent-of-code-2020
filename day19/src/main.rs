@@ -38,7 +38,7 @@ fn parse_input_file(path: &str, rules: &mut RuleMap, messages: &mut Vec<String>)
 }
 
 // Solves the given rule id recursively until "a" or "b" is found.
-fn recursive_solve(rules: &RuleMap, rule_id: i32) -> String {
+fn recursive_solve(rules: &RuleMap, rule_id: i32, mut inf_count:i32) -> String {
     let mut solved = String::new();
     if let Some(rule) = &rules.get(&rule_id) {
         solved = String::from(*rule);
@@ -51,8 +51,18 @@ fn recursive_solve(rules: &RuleMap, rule_id: i32) -> String {
                 let search_str = String::from(&solved);
                 if let Some(m) = re.find(&search_str) {
                     let id = &solved[m.start()..m.end()].parse::<i32>().unwrap();
-                    let substr = recursive_solve(&rules, *id);
-                    solved.replace_range(m.start()..m.end(), &substr);
+
+                    if *id == rule_id {
+                        inf_count += 1
+                    }
+
+                    if inf_count < 10 {
+                        let substr = recursive_solve(&rules, *id, inf_count);
+                        solved.replace_range(m.start()..m.end(), &substr);
+                    }
+                    else {
+                        solved.replace_range(m.start()-1..m.end(), "");
+                    }            
                 } else {
                     break;
                 }
@@ -67,12 +77,12 @@ fn recursive_solve(rules: &RuleMap, rule_id: i32) -> String {
 }
 
 fn main() {
-    let input = "input.txt";
+    let input = "input2.txt";
     let mut rules = RuleMap::new();
     let mut messages = vec![];
     parse_input_file(&input, &mut rules, &mut messages);
 
-    let mut the_rule = recursive_solve(&rules, 0);
+    let mut the_rule = recursive_solve(&rules, 0, 0);
 
     // Trim the search string and add ´line begin` and `line end` rules
     the_rule.retain(|c| !c.is_whitespace());
