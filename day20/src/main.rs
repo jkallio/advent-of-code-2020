@@ -17,10 +17,10 @@ fn parse_input_file(path: &str) -> Vec<Tile> {
         let line = line.unwrap();
         
         if !line.is_empty() {
-            // Prepare for new Tile
             if line.contains("Tile") {
                 y = 0;
                 if tile.id > 0 {
+                    tile.update_borders();
                     tiles.push(tile);
                 }
                 tile = Tile::new();
@@ -49,10 +49,12 @@ fn parse_input_file(path: &str) -> Vec<Tile> {
 fn main() {
     let input = "test_input.txt";
 
-    let tiles = parse_input_file(input);
-    println!("Total tile count = {}", &tiles.len());
-    for mut tile in tiles {
-        tile.update_borders();
+    let mut tiles = parse_input_file(input);
+    println!("Total tile count = {}", &tiles.len());   
+
+    if let Some(tile) = tiles.first_mut() {
+        tile.print();
+        tile.flipY();
         tile.print();
     }
 }

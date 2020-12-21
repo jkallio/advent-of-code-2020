@@ -34,11 +34,22 @@ impl Tile {
         }
     }
 
-    pub fn flip(&mut self) {
+    pub fn flipX(&mut self) {
         let orig = self.pixels.clone();
         for y in 0..size.y {
             for x in 0..size.x {
-                let flipped_pos = XY { x: size.x - x, y };
+                let flipped_pos = XY { x: size.x - x - 1, y };
+                self.pixels.insert(flipped_pos, *orig.get(&XY{x,y}).unwrap());
+            }
+        }
+        self.update_borders();
+    }
+
+    pub fn flipY(&mut self) {
+        let orig = self.pixels.clone();
+        for y in 0..size.y {
+            for x in 0..size.x {
+                let flipped_pos = XY { x, y: size.y - y - 1 };
                 self.pixels.insert(flipped_pos, *orig.get(&XY{x,y}).unwrap());
             }
         }
@@ -49,7 +60,7 @@ impl Tile {
         let orig = self.pixels.clone();
         for y in 0..size.y {
             for x in 0..size.x {
-                let rotated_pos = XY { x: size.x - y, y: x };
+                let rotated_pos = XY { x: size.x - y - 1, y: x };
                 self.pixels.insert(rotated_pos, *orig.get(&XY{x,y}).unwrap());
             }
         }
@@ -57,6 +68,11 @@ impl Tile {
     }
 
     pub fn update_borders(&mut self) {
+        self.borders.remove(&Side::TOP);
+        self.borders.remove(&Side::BOTTOM);
+        self.borders.remove(&Side::LEFT);
+        self.borders.remove(&Side::RIGHT);
+
         for x in 0..size.x {
             if *self.pixels.get(&XY{x, y:0}).unwrap() {
                 let mut top = self.borders.entry(Side::TOP).or_insert((0,0));
@@ -84,6 +100,7 @@ impl Tile {
     }
 
     pub fn print(&self) {
+        
         println!("Tile {}: Top=({}/{}); Bottom=({}/{}); Left=({}/{}); Right=({}/{})", self.id, 
             self.borders.get(&Side::TOP).unwrap().0,
             self.borders.get(&Side::TOP).unwrap().1,
