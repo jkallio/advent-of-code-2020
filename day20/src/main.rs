@@ -2,9 +2,9 @@ use std::fs::File;
 use std::io::{ BufRead, BufReader };
 use regex::Regex;
 mod tile;
-use tile::{ Tile, TileMap, XY };
+use tile::{ Tile, XY };
 
-fn parse_input_file(path: &str) -> TileMap {
+fn parse_input_file(path: &str) -> Vec<Tile> {
 
     let file = File::open(&path).unwrap();
     let br = BufReader::new(file);
@@ -50,9 +50,9 @@ fn main() {
     let input = "test_input.txt";
 
     let tiles = parse_input_file(input);
+    println!("Total tile count = {}", &tiles.len());
     for mut tile in tiles {
         tile.update_borders();
         tile.print();
     }
-
 }
