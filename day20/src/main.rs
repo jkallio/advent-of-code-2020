@@ -2,13 +2,14 @@ use regex::Regex;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 mod tile;
-use tile::{Tile, XY};
+use tile::{Tile, XY, Side};
+use std::collections::HashMap;
 
-fn parse_input_file(path: &str) -> Vec<Tile> {
+fn parse_input_file(path: &str) -> HashMap<i32, Tile> {
     let file = File::open(&path).unwrap();
     let br = BufReader::new(file);
 
-    let mut tiles: Vec<Tile> = vec![];
+    let mut tiles = HashMap::<i32, Tile>::new();
     let mut tile = Tile::new();
 
     let mut y = 0;
@@ -20,7 +21,7 @@ fn parse_input_file(path: &str) -> Vec<Tile> {
                 y = 0;
                 if tile.id > 0 {
                     tile.update_borders();
-                    tiles.push(tile);
+                    tiles.insert(tile.id, tile);
                 }
                 tile = Tile::new();
                 let re = Regex::new(r"[0-9]+").unwrap();
@@ -39,40 +40,36 @@ fn parse_input_file(path: &str) -> Vec<Tile> {
         }
     }
     tile.update_borders();
-    tiles.push(tile);
+    tiles.insert(tile.id, tile);
 
     tiles
 }
 
-fn find_neighbors(tile: &mut Tile, tiles: &[Tile]) {
-    for tile_b in tiles.iter() {
-        if tile.id != tile_b.id {
-            for borders_a in &tile.borders {
-                for borders_b in &tile_b.borders {
-                    if borders_a.1 .0 == borders_b.1 .0 || borders_a.1 .0 == borders_b.1 .1 {
-                        //println!("{} Match {} => {:?} = {:?}", tile.id, tile_b.id, borders_a.1, borders_b.1);
-                        tile.neighbors.push(tile_b.id);
+fn find_neighbors(tile: &Tile, tiles: &HashMap<i32, Tile>) -> HashMap<Side, i32> {
+    let mut neighbors = HashMap::<Side, i32>::new();
+    for neighbor in tiles.values() {
+        if tile.id != neighbor.id {
+            for tile_border in &tile.borders {
+                for neigh_border in &neighbor.borders {
+                    if tile_border.1 .0 == neigh_border.1 .0 || tile_border.1 .0 == neigh_border.1 .1 {
+                        neighbors.insert(tile_border.0.clone(), neighbor.id);
                     }
                 }
             }
         }
     }
+    neighbors
 }
 
 fn main() {
-    let input = "input.txt";
+    let input = "test_input.txt";
 
     let tiles = parse_input_file(input);
-
-    let mut result: i64 = 1;
-    for it in &tiles {
-        let mut tile = it.clone();
-        find_neighbors(&mut tile, &tiles);
-
-        if tile.neighbors.len() == 2 {
-            println!("{} is corner", tile.id);
-            result *= tile.id as i64;
+    for tile in tiles.values() {
+        print!("Neigbors for {} => ", tile.id);
+        for n in find_neighbors(&tile, &tiles) {
+            print!(" {:?} = {};", n.0, n.1);
         }
+        println!();
     }
-    println!("Result = {}", result);
 }

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 static SIZE: XY = XY { x: 10, y: 10 };
 
-#[derive(Hash, PartialEq, Eq, Clone)]
+#[derive(Hash, PartialEq, Eq, Clone, Debug)]
 pub enum Side {
     TOP,
     BOTTOM,
@@ -21,7 +21,7 @@ pub struct Tile {
     pub id: i32,
     pub pixels: HashMap<XY, bool>,
     pub borders: HashMap<Side, (i32, i32)>,
-    pub neighbors: Vec<i32>,
+    pub neighbors: HashMap<Side, i32>,
 }
 
 impl Tile {
@@ -30,7 +30,7 @@ impl Tile {
             id: -1,
             pixels: HashMap::<XY, bool>::new(),
             borders: HashMap::<Side, (i32, i32)>::new(),
-            neighbors: vec![],
+            neighbors: HashMap::<Side, i32>::new(),
         }
     }
 
