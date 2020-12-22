@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-static size:XY = XY { x:10, y:10 };
+static SIZE: XY = XY { x: 10, y: 10 };
 
 #[derive(Hash, PartialEq, Eq, Clone)]
 pub enum Side {
@@ -13,7 +13,7 @@ pub enum Side {
 #[derive(Hash, PartialEq, Eq, Clone)]
 pub struct XY {
     pub x: i32,
-    pub y: i32
+    pub y: i32,
 }
 
 #[derive(Clone)]
@@ -34,94 +34,103 @@ impl Tile {
         }
     }
 
-    pub fn flipX(&mut self) {
+    pub fn flip_x(&mut self) {
         let orig = self.pixels.clone();
-        for y in 0..size.y {
-            for x in 0..size.x {
-                let flipped_pos = XY { x: size.x - x - 1, y };
-                self.pixels.insert(flipped_pos, *orig.get(&XY{x,y}).unwrap());
+        for y in 0..SIZE.y {
+            for x in 0..SIZE.x {
+                let flipped_pos = XY {
+                    x: SIZE.x - x - 1,
+                    y,
+                };
+                self.pixels
+                    .insert(flipped_pos, *orig.get(&XY { x, y }).unwrap());
             }
         }
         self.update_borders();
     }
 
-    pub fn flipY(&mut self) {
+    pub fn flip_y(&mut self) {
         let orig = self.pixels.clone();
-        for y in 0..size.y {
-            for x in 0..size.x {
-                let flipped_pos = XY { x, y: size.y - y - 1 };
-                self.pixels.insert(flipped_pos, *orig.get(&XY{x,y}).unwrap());
+        for y in 0..SIZE.y {
+            for x in 0..SIZE.x {
+                let flipped_pos = XY {
+                    x,
+                    y: SIZE.y - y - 1,
+                };
+                self.pixels
+                    .insert(flipped_pos, *orig.get(&XY { x, y }).unwrap());
             }
         }
         self.update_borders();
     }
-    
+
     pub fn rotate(&mut self) {
         let orig = self.pixels.clone();
-        for y in 0..size.y {
-            for x in 0..size.x {
-                let rotated_pos = XY { x: size.x - y - 1, y: x };
-                self.pixels.insert(rotated_pos, *orig.get(&XY{x,y}).unwrap());
+        for y in 0..SIZE.y {
+            for x in 0..SIZE.x {
+                let rotated_pos = XY {
+                    x: SIZE.x - y - 1,
+                    y: x,
+                };
+                self.pixels
+                    .insert(rotated_pos, *orig.get(&XY { x, y }).unwrap());
             }
         }
         self.update_borders();
     }
 
     pub fn update_borders(&mut self) {
-        self.borders.remove(&Side::TOP);
-        self.borders.remove(&Side::BOTTOM);
-        self.borders.remove(&Side::LEFT);
-        self.borders.remove(&Side::RIGHT);
-
-        for x in 0..size.x {
-            if *self.pixels.get(&XY{x, y:0}).unwrap() {
-                let mut top = self.borders.entry(Side::TOP).or_insert((0,0));
-                top.1 += 1 << x;
-                top.0 += 1 << (size.x-1 - x);
+        let mut top = (0, 0);
+        let mut bottom = (0, 0);
+        let mut left = (0, 0);
+        let mut right = (0, 0);
+        for x in 0..SIZE.x {
+            if *self.pixels.get(&XY { x, y: 0 }).unwrap() {
+                top.0 += 1 << x;
+                top.1 += 1 << (SIZE.x - 1 - x);
             }
-            if *self.pixels.get(&XY{x, y:size.y-1}).unwrap() {
-                let mut bottom = self.borders.entry(Side::BOTTOM).or_insert((0,0));
-                bottom.1 += 1 << x;
-                bottom.0 += 1 << (size.x-1 - x);
+            if *self.pixels.get(&XY { x, y: SIZE.y - 1 }).unwrap() {
+                bottom.0 += 1 << x;
+                bottom.1 += 1 << (SIZE.x - 1 - x);
             }
         }
-        for y in 0..size.y {
-            if *self.pixels.get(&XY{x:0, y}).unwrap() {
-                let mut left = self.borders.entry(Side::LEFT).or_insert((0,0));
-                left.1 += 1 << y;
-                left.0 += 1 << (size.y-1 - y);
+        for y in 0..SIZE.y {
+            if *self.pixels.get(&XY { x: 0, y }).unwrap() {
+                left.0 += 1 << y;
+                left.1 += 1 << (SIZE.y - 1 - y);
             }
-            if *self.pixels.get(&XY{x:size.x-1, y}).unwrap() {
-                let mut right = self.borders.entry(Side::RIGHT).or_insert((0,0));
-                right.1 += 1 << y;
-                right.0 += 1 << (size.y-1 - y);
-            }    
+            if *self.pixels.get(&XY { x: SIZE.x - 1, y }).unwrap() {
+                right.0 += 1 << y;
+                right.1 += 1 << (SIZE.y - 1 - y);
+            }
         }
+        self.borders.insert(Side::TOP, top);
+        self.borders.insert(Side::BOTTOM, bottom);
+        self.borders.insert(Side::LEFT, left);
+        self.borders.insert(Side::RIGHT, right);
     }
 
-    pub fn print(&self) {
-        for y in 0..size.y {
-            for x in 0..size.x {
+    pub fn print_pixels(&self) {
+        for y in 0..SIZE.y {
+            for x in 0..SIZE.x {
                 let mut c = '.';
-                if *self.pixels.get(&XY {x,y}).unwrap() {
+                if *self.pixels.get(&XY { x, y }).unwrap() {
                     c = '#';
                 }
                 print!("{}", c);
             }
-            println!("");
+            println!();
         }
     }
 
     pub fn print_borders(&self) {
-        println!("Tile {}: Top=({}/{}); Bottom=({}/{}); Left=({}/{}); Right=({}/{})", self.id, 
-            self.borders.get(&Side::TOP).unwrap().0,
-            self.borders.get(&Side::TOP).unwrap().1,
-            self.borders.get(&Side::BOTTOM).unwrap().0,
-            self.borders.get(&Side::BOTTOM).unwrap().1,
-            self.borders.get(&Side::LEFT).unwrap().0,
-            self.borders.get(&Side::LEFT).unwrap().1,
-            self.borders.get(&Side::RIGHT).unwrap().0,
-            self.borders.get(&Side::RIGHT).unwrap().1);
+        println!(
+            "Tile {}: Top=({:?}); Bottom=({:?}); Left=({:?}); Right=({:?})",
+            self.id,
+            self.borders.get(&Side::TOP).unwrap(),
+            self.borders.get(&Side::BOTTOM).unwrap(),
+            self.borders.get(&Side::LEFT).unwrap(),
+            self.borders.get(&Side::RIGHT).unwrap()
+        );
     }
 }
-
