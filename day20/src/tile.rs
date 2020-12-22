@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::rc::Rc;
 
 static size:XY = XY { x:10, y:10 };
 
@@ -17,11 +16,12 @@ pub struct XY {
     pub y: i32
 }
 
+#[derive(Clone)]
 pub struct Tile {
     pub id: i32,
     pub pixels: HashMap<XY, bool>,
     pub borders: HashMap<Side, (i32, i32)>,
-    pub neighbors: Vec<Rc<Tile>>,
+    pub neighbors: Vec<i32>,
 }
 
 impl Tile {
@@ -100,17 +100,6 @@ impl Tile {
     }
 
     pub fn print(&self) {
-        
-        println!("Tile {}: Top=({}/{}); Bottom=({}/{}); Left=({}/{}); Right=({}/{})", self.id, 
-            self.borders.get(&Side::TOP).unwrap().0,
-            self.borders.get(&Side::TOP).unwrap().1,
-            self.borders.get(&Side::BOTTOM).unwrap().0,
-            self.borders.get(&Side::BOTTOM).unwrap().1,
-            self.borders.get(&Side::LEFT).unwrap().0,
-            self.borders.get(&Side::LEFT).unwrap().1,
-            self.borders.get(&Side::RIGHT).unwrap().0,
-            self.borders.get(&Side::RIGHT).unwrap().1);
-
         for y in 0..size.y {
             for x in 0..size.x {
                 let mut c = '.';
@@ -123,9 +112,16 @@ impl Tile {
         }
     }
 
-    /*
-    pub fn find_neighbors(&mut self, tiles:&[Tile]) {
+    pub fn print_borders(&self) {
+        println!("Tile {}: Top=({}/{}); Bottom=({}/{}); Left=({}/{}); Right=({}/{})", self.id, 
+            self.borders.get(&Side::TOP).unwrap().0,
+            self.borders.get(&Side::TOP).unwrap().1,
+            self.borders.get(&Side::BOTTOM).unwrap().0,
+            self.borders.get(&Side::BOTTOM).unwrap().1,
+            self.borders.get(&Side::LEFT).unwrap().0,
+            self.borders.get(&Side::LEFT).unwrap().1,
+            self.borders.get(&Side::RIGHT).unwrap().0,
+            self.borders.get(&Side::RIGHT).unwrap().1);
     }
-    */
 }
 

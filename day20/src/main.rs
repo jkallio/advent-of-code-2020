@@ -46,15 +46,46 @@ fn parse_input_file(path: &str) -> Vec<Tile> {
     tiles
 }
 
+fn find_neighbors(tile:&mut Tile, tiles:&[Tile]) {
+
+    for (i, tile_b) in tiles.iter().enumerate() {
+        if tile.id != tile_b.id {
+            assert_eq!(tile.id == tile_b.id, false);
+            for borders_a in &tile.borders {
+                for borders_b in &tile_b.borders {
+                    if borders_a.1.0 == borders_b.1.0 || borders_a.1.0 == borders_b.1.1 {
+                        println!("{} Match {} => {:?} & {:?}", tile.id, tile_b.id, borders_a.1, borders_b.1);
+                        &tile.neighbors.push(tile_b.id);
+                    }
+                }
+            }
+        }
+    }
+}
+
+
 fn main() {
     let input = "test_input.txt";
 
-    let mut tiles = parse_input_file(input);
-    println!("Total tile count = {}", &tiles.len());   
-
-    if let Some(tile) = tiles.first_mut() {
-        tile.print();
-        tile.flipY();
-        tile.print();
+    let tiles = parse_input_file(input);
+    for it in &tiles {
+        let mut tile = it.clone();
+        find_neighbors(&mut tile, &tiles);
     }
+
+
+    /*
+    //let mut corner_tiles = vec![];
+    for tile in &tiles {
+        let mut tmp = tile.clone();
+        tmp.update_borders();
+
+        find_neighbors(&mut tmp, &tiles);
+        print!("{} neighbors = ", tmp.id);
+        for n in tmp.neighbors {
+            print!("{} ", n);
+        }
+        println!("");
+    }
+    */
 }
