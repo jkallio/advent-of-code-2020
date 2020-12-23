@@ -5,6 +5,8 @@ mod tile;
 use tile::{Tile, XY, Side};
 use std::collections::HashMap;
 
+type NeighborList = HashMap::<i32, Vec<i32>>;
+
 fn parse_input_file(path: &str) -> HashMap<i32, Tile> {
     let file = File::open(&path).unwrap();
     let br = BufReader::new(file);
@@ -45,14 +47,14 @@ fn parse_input_file(path: &str) -> HashMap<i32, Tile> {
     tiles
 }
 
-fn find_neighbors(tile: &Tile, tiles: &HashMap<i32, Tile>) -> HashMap<Side, i32> {
-    let mut neighbors = HashMap::<Side, i32>::new();
+fn find_neighbors(tile: &Tile, tiles: &HashMap<i32, Tile>) -> Vec<i32> {
+    let mut neighbors = vec![];
     for neighbor in tiles.values() {
         if tile.id != neighbor.id {
             for tile_border in &tile.borders {
                 for neigh_border in &neighbor.borders {
                     if tile_border.1 .0 == neigh_border.1 .0 || tile_border.1 .0 == neigh_border.1 .1 {
-                        neighbors.insert(tile_border.0.clone(), neighbor.id);
+                        neighbors.push(neighbor.id);
                     }
                 }
             }
@@ -61,15 +63,33 @@ fn find_neighbors(tile: &Tile, tiles: &HashMap<i32, Tile>) -> HashMap<Side, i32>
     neighbors
 }
 
+fn find_corner_pieces(neighbor_list: &NeighborList) -> Vec<i32> {
+    let mut corners = Vec::<i32>::new();
+    for val in neighbor_list {
+        if val.1.len() == 2 {
+            corners.push(*val.0);
+        }
+    }
+    corners
+}
+
 fn main() {
     let input = "test_input.txt";
 
+    let mut neighbor_list = NeighborList::new();
     let tiles = parse_input_file(input);
     for tile in tiles.values() {
-        print!("Neigbors for {} => ", tile.id);
-        for n in find_neighbors(&tile, &tiles) {
-            print!(" {:?} = {};", n.0, n.1);
+        neighbor_list.insert(tile.id, find_neighbors(&tile, &tiles));
+    }
+
+    let corners = find_corner_pieces(&neighbor_list);
+    for tile_id in corners {
+        let list = neighbor_list.get(&tile_id).unwrap();
+        print!("Neigbors for {} => ", tile_id);
+        for i in list {
+            print!(" {},", i);
         }
         println!();
     }
+
 }
